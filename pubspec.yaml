@@ -1,0 +1,20 @@
+name: fast_package
+description: Flutter package to help you develop quickly.
+version: 0.0.1
+homepage: https://github.com/ArturoRen/fast-package
+
+environment:
+  sdk: '>=3.3.4 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  test: ^1.22.0
+
+flutter:
