@@ -70,3 +70,40 @@ FastRateLimit.rateLimit(
 
 //不断调用，会每隔1s执行一次
 ```
+
+## 扩展
+
+### 空安全扩展
+
+```dart
+// 1. 基本类型的空安全（string,double,int,bool,num）
+String? str = null;
+print(str.nullSafeOrEmpty); // ""
+print(str.nullSafe("default"));//default
+print(str.nullSafeThrow()); // Value should not be null
+
+```
+
+## 字符串扩展
+
+```dart
+ /// 将字符串转换为小驼峰命名（to lower camel case）
+  /// Convert the string into a small camel case.
+  String get toCamelCase => _convertToCamelCase(this, false);
+
+  ///  将字符串转换为帕斯卡命名法：大驼峰命名 (to PascalCase)
+  ///  Convert strings into Pascal nomenclature: big hump naming
+  String get toPascalCase => _convertToCamelCase(this, true);
+
+  /// 将字符串转换为大蛇形命名法（Snake Case）
+  /// Convert a string into a Big Snake Case.
+  String get toSnakeCase => _toDelimiterNaming(this, '_').toUpperCase();
+
+  /// 将字符串转换为小蛇形命名法（Small Snake Case）
+  /// Convert a string into a Big Snake Case.
+  String get toSnakeCaseLower => _toDelimiterNaming(this, '_').toLowerCase();
+
+  /// 将字符串转换为字符串命名
+  /// Convert a string to a string name
+  String get toKebabCase => _toDelimiterNaming(this, '-').toLowerCase();
+```
