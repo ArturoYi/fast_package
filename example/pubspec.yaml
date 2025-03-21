@@ -13,7 +13,7 @@ dependencies:
   cupertino_icons: ^1.0.6
 
   fast_package:
-    path: ../../fast-package
+    path: ../../fast_package
 
 dev_dependencies:
   flutter_test:

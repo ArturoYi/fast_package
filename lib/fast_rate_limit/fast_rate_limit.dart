@@ -1,4 +1,4 @@
-import 'package:fast_package/use_package.dart';
+import 'dart:async' show Timer;
 
 typedef FastRateLimitCallback = void Function();
 

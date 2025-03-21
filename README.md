@@ -73,7 +73,7 @@ FastRateLimit.rateLimit(
 
 ## 扩展
 
-### 空安全扩展
+### 空安全扩展（基本类型）
 
 ```dart
 // 1. 基本类型的空安全（string,double,int,bool,num）

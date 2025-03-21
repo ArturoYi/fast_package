@@ -1,4 +1,4 @@
-import 'package:fast_package/use_package.dart';
+import 'dart:async' show Timer;
 
 /// 定义一个void回调作为参数，避免导入过多的包
 /// A void callback, i.e. (){}, so we don't need to import e.g. `dart.ui`

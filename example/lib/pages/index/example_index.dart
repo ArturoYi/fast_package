@@ -5,7 +5,8 @@ class ExampleIndex extends StatelessWidget {
   ExampleIndex({super.key});
 
   final List<ListType> exampleList = [
-    ListType(name: "double example", path: ExampleRoute.debounce),
+    ListType(name: "debounce example", path: ExampleRoute.debounce),
+    ListType(name: "border example", path: ExampleRoute.border),
   ];
 
   @override
