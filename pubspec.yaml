@@ -1,7 +1,7 @@
 name: fast_package
 description: Flutter package to help you develop quickly.(帮助快速开发的工具包)
-version: 0.0.1
-homepage: https://github.com/ArturoRen/fast-package
+version: 0.0.2
+homepage: https://github.com/ArturoYi/fast_package
 
 environment:
   sdk: '>=3.3.4 <4.0.0'
