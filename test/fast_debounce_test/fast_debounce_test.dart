@@ -1,4 +1,5 @@
-import 'package:fast_package/fast_debounce/fast_debounce.dart';
+
+import 'package:fast_package/fast_package.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,6 +1,5 @@
 import 'dart:async' show Timer, Completer;
-
-import 'package:fast_package/fast_throttle/fast_throttle.dart';
+import 'package:fast_package/fast_package.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

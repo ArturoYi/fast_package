@@ -1,4 +1,4 @@
-import 'package:fast_package/fast_gradient_borders/gradient_box_borders.dart';
+import 'package:fast_package/fast_package.dart';
 import 'package:flutter/material.dart';
 
 class GradientBorderExample extends StatefulWidget {

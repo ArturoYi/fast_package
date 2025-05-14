@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fast_package/fast_extension/string_extension.dart';
-
+import 'package:fast_package/fast_package.dart';
 void main() {
   group("test fast_object_extension", () {
     test(

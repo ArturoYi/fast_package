@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:fast_package/fast_rate_limit/fast_rate_limit.dart';
+import 'package:fast_package/fast_package.dart';
 import 'package:test/test.dart';
 
 void main() {
