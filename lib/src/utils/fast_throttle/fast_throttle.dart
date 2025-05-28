@@ -14,9 +14,11 @@ class _FastThrottleOperation {
   /// 需要在节流开始时执行的回调函数
   /// The callback function to be executed when throttling starts.
   FastThrottleVoidCallback onExecute;
+
   /// 可选的，在节流结束后执行的回调函数
   /// Optional callback function to be executed after throttling ends.
   FastThrottleVoidCallback? onAfter;
+
   /// 用于控制节流的定时器
   /// Timer used to control the throttling.
   Timer timer;
@@ -77,6 +79,7 @@ class FastThrottle {
       /// If the current tag already exists, it means it's currently throttling.
       return true;
     }
+
     /// 创建新的节流操作
     /// Create a new throttle operation.
     _operations[tag] = _FastThrottleOperation(
@@ -95,6 +98,7 @@ class FastThrottle {
         },
       ),
     );
+
     /// 立即执行onExecute回调
     /// Execute the onExecute callback immediately.
     onExecute();

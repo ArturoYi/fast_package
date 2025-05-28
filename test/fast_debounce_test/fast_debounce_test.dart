@@ -1,4 +1,3 @@
-
 import 'package:fast_package/fast_package.dart';
 import 'package:test/test.dart';
 

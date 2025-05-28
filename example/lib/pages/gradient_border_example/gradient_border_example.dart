@@ -28,16 +28,12 @@ class _GradientBorderExampleState extends State<GradientBorderExample> {
               height: 200,
               decoration: const BoxDecoration(
                 border: GradientBoxBorders(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.red,
-                      Colors.blue,
-                      Colors.green,
-                      Colors.yellow,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight
-                  ),
+                  gradient: LinearGradient(colors: [
+                    Colors.red,
+                    Colors.blue,
+                    Colors.green,
+                    Colors.yellow,
+                  ], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   width: 2,
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(10)),

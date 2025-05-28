@@ -1,4 +1,3 @@
-
 extension FastDoubleNullSafeExtension on double? {
   /// 默认值
   double get nullSafeOrEmpty => this ?? 0.0;

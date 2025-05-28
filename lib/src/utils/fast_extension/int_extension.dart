@@ -1,4 +1,3 @@
-
 extension FastIntNullSafeExtension on int? {
   /// 默认值
   int get nullSafeOrEmpty => this ?? 0;

@@ -1,3 +1,1 @@
-class FastAsyncNode{
-  
-}
+class FastAsyncNode {}

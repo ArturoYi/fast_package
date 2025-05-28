@@ -17,6 +17,5 @@ export 'src/utils/fast_async_queue/fast_queue_event.dart';
 export 'src/utils/fast_async_queue/fast_queue_node.dart';
 export 'src/utils/fast_async_queue/typedef.dart';
 
-
 // ---------------------------ui kit---------------------------
 export 'src/ui_kit/fast_gradient_borders/gradient_box_borders.dart';

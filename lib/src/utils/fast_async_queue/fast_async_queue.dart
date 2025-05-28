@@ -1,4 +1,2 @@
-
 //
-class FastAsyncQueue{
-}
+class FastAsyncQueue {}

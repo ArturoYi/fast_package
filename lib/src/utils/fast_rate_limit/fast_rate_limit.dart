@@ -14,6 +14,7 @@ class _FastRateLimitOperation {
   /// 在速率限制周期内，如果再次触发，则会更新此回调
   /// If triggered again within the rate limit period, this callback will be updated.
   FastRateLimitCallback? callback;
+
   /// 在速率限制周期结束后，如果之前有更新的回调，则会执行此回调
   /// If there was an updated callback during the rate limit period, this callback will be executed after the period ends.
   FastRateLimitCallback? onAfter;
@@ -78,6 +79,7 @@ class FastRateLimit {
       _operations[tag]?.onAfter = onAfter;
       return true;
     }
+
     /// 创建新的速率限制操作
     /// Create a new rate limit operation.
     final rateLimit = _FastRateLimitOperation(
@@ -117,16 +119,18 @@ class FastRateLimit {
             /// Then clear the cached callbacks to prepare for the next time window.
             operation.callback?.call();
             operation.onAfter?.call(); // 执行的是被更新后的 onAfter
-                                      // Execute the updated onAfter
+            // Execute the updated onAfter
             operation.callback = null;
             operation.onAfter = null;
           }
         }
       }),
     );
+
     /// 将新的速率限制操作存入Map
     /// Store the new rate limit operation in the Map.
     _operations[tag] = rateLimit;
+
     /// 立即执行首次的 onExecute 回调
     /// Immediately execute the initial onExecute callback.
     onExecute();

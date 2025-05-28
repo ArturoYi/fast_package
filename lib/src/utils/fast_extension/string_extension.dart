@@ -1,4 +1,3 @@
-
 extension FastStringNullSafeExtension on String? {
   /// 默认值
   String get nullSafeOrEmpty => this ?? '';

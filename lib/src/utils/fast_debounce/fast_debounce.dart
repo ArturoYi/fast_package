@@ -15,9 +15,11 @@ class _FastDebounceOperation {
   /// 存储需要执行的回调函数
   /// Stores the callback function to be executed.
   FastDebounceVoidCallback callback;
+
   /// 用于控制防抖的定时器
   /// Timer used to control the debounce.
   Timer timer;
+
   /// 构造函数，初始化回调函数和定时器
   /// Constructor, initializes the callback function and timer.
   _FastDebounceOperation(this.callback, this.timer);
@@ -68,6 +70,7 @@ class FastDebounce {
       /// 1. Cancel the previous timer (if it exists).
       _operations[tag]?.timer.cancel();
       _operations.remove(tag);
+
       /// 2. 创建新的防抖操作
       /// 2. Create a new debounce operation.
       _operations[tag] = _FastDebounceOperation(

@@ -25,6 +25,8 @@ import 'package:fast_package/fast_package.dart';
 
 1. 防抖使用：
 
+- 不断调用，会在1s后执行一次
+
 ```dart
 import 'package:fast_package/fast_package.dart';
 
@@ -41,6 +43,8 @@ FastDebounce.debounce(
 
 2.  节流使用：
 
+- 不断调用，会每隔1s一定执行一次
+
 ```dart
 import 'package:fast_package/fast_package.dart';
 
@@ -56,6 +60,8 @@ FastThrottle.throttle(
 ```
 3. 速率限制使用：
 
+- 不断调用，会每隔1s执行一次
+
 ```dart
 import 'package:fast_package/fast_package.dart';
 FastRateLimit.rateLimit(
@@ -67,8 +73,6 @@ FastRateLimit.rateLimit(
     });
   },
 );
-
-//不断调用，会每隔1s执行一次
 ```
 
 ## 扩展
