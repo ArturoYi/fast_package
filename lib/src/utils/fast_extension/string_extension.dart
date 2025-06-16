@@ -15,6 +15,9 @@ extension FastStringNullSafeExtension on String? {
     }
     return this!;
   }
+
+  /// 是否为空
+  bool get isNullOrEmpty => this == null || this!.isEmpty;
 }
 
 extension FastStringExtension on String {
