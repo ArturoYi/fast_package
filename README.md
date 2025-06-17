@@ -1,7 +1,10 @@
 # fast_package
 
-帮助快速开发的 package，目的是基于纯 flutter 实现各种 util 合集。
-一切 util 都基于业务。
+帮助快速开发的 package，目的是基于纯 flutter 实现各种工具方法。
+
+一切基于业务。
+
+如果你有更好的主意，可以联系我。
 
 ## 使用
 
@@ -77,10 +80,11 @@ FastRateLimit.rateLimit(
 
 ## 扩展
 
-### 空安全扩展（基本类型）
+比较多，有特点需要时再决定是否查看，没必要全部阅读。
+
+### 空安全扩展（string,double,int,bool,num）
 
 ```dart
-// 1. 基本类型的空安全（string,double,int,bool,num）
 String? str = null;
 print(str.nullSafeOrEmpty); // ""
 print(str.nullSafe("default"));//default
@@ -94,20 +98,40 @@ print(str.nullSafeThrow()); // Value should not be null
  /// 将字符串转换为小驼峰命名（to lower camel case）
   /// Convert the string into a small camel case.
   String get toCamelCase => _convertToCamelCase(this, false);
+  // 示例：
+  // "hello_world" => "helloWorld"
+  // "user-name" => "userName"
+  // "FirstName" => "firstName"
 
   ///  将字符串转换为帕斯卡命名法：大驼峰命名 (to PascalCase)
   ///  Convert strings into Pascal nomenclature: big hump naming
   String get toPascalCase => _convertToCamelCase(this, true);
+  // 示例：
+  // "hello_world" => "HelloWorld"
+  // "user-name" => "UserName"
+  // "firstName" => "FirstName"
 
   /// 将字符串转换为大蛇形命名法（Snake Case）
   /// Convert a string into a Big Snake Case.
   String get toSnakeCase => _toDelimiterNaming(this, '_').toUpperCase();
+  // 示例：
+  // "helloWorld" => "HELLO_WORLD"
+  // "user-name" => "USER_NAME"
+  // "FirstName" => "FIRST_NAME"
 
   /// 将字符串转换为小蛇形命名法（Small Snake Case）
   /// Convert a string into a Big Snake Case.
   String get toSnakeCaseLower => _toDelimiterNaming(this, '_').toLowerCase();
+  // 示例：
+  // "helloWorld" => "hello_world"
+  // "user-name" => "user_name"
+  // "FirstName" => "first_name"
 
   /// 将字符串转换为字符串命名
   /// Convert a string to a string name
   String get toKebabCase => _toDelimiterNaming(this, '-').toLowerCase();
+  // 示例：
+  // "helloWorld" => "hello-world"
+  // "user_name" => "user-name"
+  // "FirstName" => "first-name"
 ```
