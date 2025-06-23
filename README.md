@@ -1,6 +1,6 @@
 # fast_package
 
-帮助快速开发的 package，目的是基于纯 flutter 实现各种工具方法。
+帮助快速开发的 package，目的是基于纯 flutter 实现各种工具方法，也会记录在开发中经常使用的package。
 
 一切基于业务。
 
@@ -135,3 +135,97 @@ print(str.nullSafeThrow()); // Value should not be null
   // "user_name" => "user-name"
   // "FirstName" => "first-name"
 ```
+
+## 异步任务队列 (FastAsyncQueue)
+
+一个用于管理和按顺序执行异步任务的队列实现。
+
+This package would be useful if you have multiple widgets in a screen or even in multiple screens that need to do some async requests that are related to each other.
+
+### 主要特性
+- 顺序执行异步任务
+- 自动启动模式（添加任务后立即执行）
+- 可配置的任务重试机制
+- 队列状态变化的事件监听
+- 任务标签和状态跟踪
+
+### 基本使用-创建队列
+```dart
+// 普通队列，需要手动调用 start()
+ final asyncQ = AsyncQueue();
+  asyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 1), () => print("normalQ: 1")));
+  asyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 4), () => print("normalQ: 2")));
+  asyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 2), () => print("normalQ: 3")));
+  asyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 1), () => print("normalQ: 4")));
+
+await asyncQ.start();
+
+    // normalQ: 1
+    // normalQ: 2
+    // normalQ: 3
+    // normalQ: 4
+
+```
+
+### 自动执行队列
+
+```dart
+// 自动启动队列，添加任务后立即执行
+final autoQueue = FastAsyncQueue.autoStart();
+final autoAsyncQ = AsyncQueue.autoStart();
+
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 1), () => print("AutoQ: 1")));
+  await Future.delayed(const Duration(seconds: 6));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 0), () => print("AutoQ: 1.2")));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 0), () => print("AutoQ: 1.3")));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 4), () => print("AutoQ: 2")));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 3), () => print("AutoQ: 2.2")));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 2), () => print("AutoQ: 3")));
+  autoAsyncQ.addJob(() =>
+      Future.delayed(const Duration(seconds: 1), () => print("AutoQ: 4")));
+
+    // AutoQ: 1
+    // AutoQ: 1.2
+    // AutoQ: 1.3
+    // AutoQ: 2
+    // AutoQ: 2.2
+    // AutoQ: 3
+    // AutoQ: 4
+
+```
+
+### 队列监听
+
+
+```dart
+  final asyncQ = AsyncQueue();
+
+  asyncQ.addQueueListener((event) => print("$event"));
+```
+
+### 队列失败重试
+
+```dart
+    q.addJob(() async {
+      try {
+        //do something
+      } catch (e) {
+        q.retry();
+      }
+    },
+    //default is 1
+     retryTime: 3,
+    );
+```
+
+

@@ -11,11 +11,14 @@ export 'src/utils/fast_extension/num_extension.dart';
 export 'src/utils/fast_extension/int_extension.dart';
 export 'src/utils/fast_extension/double_extension.dart';
 
-//队列
+//队列执行
 export 'src/utils/fast_async_queue/fast_async_queue.dart';
 export 'src/utils/fast_async_queue/fast_queue_event.dart';
-export 'src/utils/fast_async_queue/fast_queue_node.dart';
+export 'src/utils/fast_async_queue/fast_job_info.dart';
 export 'src/utils/fast_async_queue/typedef.dart';
+export 'src/utils/fast_async_queue/exceptions.dart';
+export 'src/utils/fast_async_queue/enum.dart';
+export 'src/utils/fast_async_queue/fast_async_node.dart' hide FastAsyncNode;
 
 // ---------------------------ui kit---------------------------
 export 'src/ui_kit/fast_gradient_borders/gradient_box_borders.dart';
