@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 
 import 'package:fast_package/fast_package.dart';
 import 'package:test/test.dart';
@@ -89,7 +90,7 @@ void main() {
     final q = FastAsyncQueue();
     int jobCount = 0;
     int retryCount = 0;
-    final failTime = 12;
+    const failTime = 12;
 
     q.addJob(
         () => Future.delayed(
@@ -118,7 +119,7 @@ void main() {
     final q = FastAsyncQueue();
     int jobCount = 0;
     int retryCount = 0;
-    final failTime = 12;
+    const failTime = 12;
 
     q.addJob(
         () => Future.delayed(

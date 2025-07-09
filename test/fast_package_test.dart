@@ -8,6 +8,7 @@ import 'fast_num_extension_test/fast_num_extension_test.dart'
 import 'fast_async_queue_test/fast_async_queue_test.dart' as fast_async_queue_test;
 import 'fast_async_queue_test/fast_async_queue_retry_test.dart' as fast_async_queue_retry_test;
 import 'fast_async_queue_test/fast_async_queue_info_test.dart' as fast_async_queue_info_test;
+import 'fast_scan_test/fast_scan_test.dart' as fast_scan_test;
 
 void main() {
   fast_debounce_test.main();
@@ -18,4 +19,5 @@ void main() {
   fast_async_queue_test.main();
   fast_async_queue_retry_test.main();
   fast_async_queue_info_test.main();
+  fast_scan_test.main();
 }

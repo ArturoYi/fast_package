@@ -1,5 +1,6 @@
+// ignore_for_file: avoid_print
+
 import 'package:fast_package/fast_package.dart';
-import 'package:fast_package/src/utils/fast_async_queue/enum.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 

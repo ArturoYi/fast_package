@@ -22,3 +22,6 @@ export 'src/utils/fast_async_queue/fast_async_node.dart' hide FastAsyncNode;
 
 // ---------------------------ui kit---------------------------
 export 'src/ui_kit/fast_gradient_borders/gradient_box_borders.dart';
+
+// ---------------------------scan utils---------------------------
+export 'src/utils/fast_scan/fast_scan.dart';
