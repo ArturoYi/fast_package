@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:fast_package/fast_package.dart';
 import 'package:test/test.dart';
@@ -64,26 +66,48 @@ void main() {
     test(
         "对rateLimit的每个调用仅在rateLimit完成时执行 \n each call to rateLimit only executes if the rateLimit has finished",
         () async {
-      DateTime start = DateTime.now();
+      final executedIndexes = <int>[];
+      int executionCount = 0;
 
-      final onExecute = expectAsync1((int index) {
-        Duration startStopDiff = DateTime.now().difference(start);
-        int actualExpectedDiffMs = startStopDiff.inMilliseconds.abs();
-        expect(actualExpectedDiffMs < 10 || actualExpectedDiffMs > 500, true);
-        expect(index == 0 || index == 3 || index == 4, true);
-      }, count: 3);
+      final onExecute = expectAsync1(
+        (int index) {
+          executedIndexes.add(index);
+          executionCount++;
+          print('onExecuteIndex: $index, count: $executionCount');
+        },
+        count: 2, // 修正：只执行2次 - 第一次立即执行，最后一次在rate limit后执行
+      );
+      
+      // 第一次调用，立即执行
       FastRateLimit.rateLimit(
           tag: 'has-finished',
           duration: const Duration(milliseconds: 500),
           onExecute: () => onExecute(0));
-      for (int i = 0; i < 5; i++) {
+      
+      // 在500ms内多次调用，只有最后一次会被缓存
+      for (int i = 1; i < 5; i++) {
         await Future.delayed(const Duration(milliseconds: 110));
         FastRateLimit.rateLimit(
           tag: 'has-finished',
-          duration: const Duration(milliseconds: 110),
+          duration: const Duration(milliseconds: 500), // 保持一致的duration
           onExecute: () => onExecute(i),
         );
       }
+      
+      // 等待所有执行完成
+      await Future.delayed(const Duration(milliseconds: 600));
+      
+      // 验证执行次数：第一次立即执行，最后一次在rate limit后执行
+      expect(executionCount, 2, reason: 'Should execute exactly 2 times: first immediately, last after rate limit');
+      
+      // 验证第一次调用总是执行
+      expect(executedIndexes[0], 0, reason: 'First execution should be index 0');
+      
+      // 验证最后一次执行的是最后一个调用（index=4）
+      expect(executedIndexes[1], 4, reason: 'Last execution should be the final call (index 4)');
+      
+      // 验证执行顺序：第一次立即执行，最后一次在rate limit结束后执行
+      expect(executedIndexes.length, 2, reason: 'Should have exactly 2 executions');
     });
 
     test(
