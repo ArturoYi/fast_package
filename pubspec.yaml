@@ -1,6 +1,6 @@
 name: fast_package
 description: 一个帮助您快速开发的Flutter 包，如果您发现任何需要改进的地方，或者想要请求某个功能，请在GitHub上提交issue，感谢您的反馈和贡献。
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/ArturoYi/fast_package
 
 environment:

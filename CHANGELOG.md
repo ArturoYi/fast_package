@@ -11,3 +11,9 @@
 ## 0.0.2
 
 * Added new extensions
+
+## 0.0.3
+
+* Added new features
+- cover_size
+* Fixed bugs
