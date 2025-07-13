@@ -57,3 +57,82 @@ Size fastCoverScanSize(Size parentSize, Size childSize) {
     return Size(childSize.width * scale, childSize.height * scale);
   }
 }
+
+/// Get the scaling ratio for the child element to cover the parent container
+/// 获取子元素覆盖父容器的缩放比例
+///
+/// This function calculates the scaling ratio needed to make the child element cover the parent container
+/// while maintaining aspect ratio. It implements the same algorithm as fastCoverScanSize but returns
+/// only the scaling factor instead of the calculated size.
+/// 此函数计算子元素覆盖父容器的缩放比例，同时保持宽高比。它实现了与fastCoverScanSize相同的算法，
+/// 但只返回缩放因子而不是计算后的尺寸。
+///
+/// Algorithm steps:
+/// 算法步骤：
+/// 1. Check for edge cases with zero dimensions
+///    检查包含零维度的边界情况
+/// 2. Check if parent and child have the same aspect ratio
+///    检查父容器和子元素是否具有相同的宽高比
+/// 3. Calculate aspect ratios of both parent and child
+///    计算父容器和子元素的宽高比
+/// 4. Compare aspect ratios to determine scaling direction
+///    比较宽高比以确定缩放方向
+/// 5. Return the appropriate scaling ratio
+///    返回相应的缩放比例
+///
+/// Scaling logic:
+/// 缩放逻辑：
+/// - If parent aspect ratio >= child aspect ratio: scale by width
+///   如果父容器宽高比 >= 子元素宽高比：按宽度缩放
+/// - If parent aspect ratio < child aspect ratio: scale by height
+///   如果父容器宽高比 < 子元素宽高比：按高度缩放
+/// - If aspect ratios are equal: return 1.0 (no scaling needed)
+///   如果宽高比相同：返回1.0（无需缩放）
+///
+/// @param parentSize The size of the parent container (width x height)
+///                   父容器尺寸 (宽 x 高)
+/// @param childSize The original size of the child element (width x height)
+///                  子元素原始尺寸 (宽 x 高)
+/// @return The scaling ratio needed to make the child element cover the parent container
+///         子元素覆盖父容器的缩放比例
+///         - Returns 1.0 if any dimension is zero or aspect ratios are equal
+///           如果任何维度为零或宽高比相同则返回1.0
+///         - Returns width scale ratio if parent is wider relative to child
+///           如果父容器相对于子元素更宽则返回宽度缩放比例
+///         - Returns height scale ratio if parent is taller relative to child
+///           如果父容器相对于子元素更高则返回高度缩放比例
+///
+/// Examples:
+/// 示例：
+/// ```dart
+/// // Parent: 100x100, Child: 50x50 -> scale = 2.0 (width scale)
+/// double scale = fastCoverScanScale(Size(100, 100), Size(50, 50));
+/// 
+/// // Parent: 100x100, Child: 200x100 -> scale = 1.0 (no scaling needed)
+/// double scale = fastCoverScanScale(Size(100, 100), Size(200, 100));
+/// 
+/// // Parent: 100x100, Child: 50x200 -> scale = 2.0 (width scale)
+/// double scale = fastCoverScanScale(Size(100, 100), Size(50, 200));
+/// 
+/// // Parent: 100x100, Child: 200x50 -> scale = 2.0 (height scale)
+/// double scale = fastCoverScanScale(Size(100, 100), Size(200, 50));
+/// ```
+double fastCoverScanScale(Size parentSize, Size childSize) {
+  // 处理包含零维度的边界情况
+  if (parentSize.width == 0 || parentSize.height == 0 || childSize.width == 0 || childSize.height == 0) {
+    return 1.0;
+  }
+  
+  // 计算父容器和子元素的宽高比 (宽度 / 高度)
+  double parentAspectRatio = parentSize.width / parentSize.height;
+  double childAspectRatio = childSize.width / childSize.height;
+  
+  // 比较宽高比以确定缩放策略
+  if (parentAspectRatio >= childAspectRatio) {
+    // 父容器比子元素更宽（或宽高比相同），按宽度缩放
+    return parentSize.width / childSize.width;
+  } else {
+    // 父容器比子元素更高，按高度缩放
+    return parentSize.height / childSize.height;
+  }
+}
