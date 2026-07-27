@@ -31,3 +31,8 @@ build/
 
 # FVM Version Cache
 .fvm/
+
+# VitePress (docs site)
+docs/node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
