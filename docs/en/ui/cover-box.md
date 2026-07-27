@@ -4,7 +4,7 @@ title: Cover Box
 
 ### Cover Box
 
-Smart container component that automatically handles content coverage and adaptation.
+A smart container that handles cover-style layout and content fitting automatically.
 
 ```dart
 import 'package:fast_package/fast_package.dart';

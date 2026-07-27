@@ -6,7 +6,7 @@ title: Getting Started
 
 ### Installation
 
-Please check the latest version before installation. If there are any issues with the new version, please use the previous version.
+Check the latest version before installing. If a new release causes problems, pin the previous version.
 
 ```yaml
 dependencies:

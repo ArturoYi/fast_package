@@ -4,20 +4,20 @@ title: Async Task Queue
 
 ### Async Task Queue
 
-A queue implementation for managing and executing asynchronous tasks in sequence.
+A queue for managing and running asynchronous tasks in order.
 
-#### Key Features
+#### Key features
 
-- ✅ Sequential execution of async tasks
+- ✅ Run async tasks sequentially
 - ✅ Auto-start mode
-- ✅ Configurable task retry mechanism
-- ✅ Event listening for queue state changes
-- ✅ Task labeling and status tracking
+- ✅ Configurable task retries
+- ✅ Listen for queue state changes
+- ✅ Task tags and status tracking
 
-#### Basic Usage - Create Queue
+#### Basic usage — create a queue
 
 ```dart
-// Normal queue, requires manual start() call
+// Standard queue; call start() manually
 final asyncQ = AsyncQueue();
 asyncQ.addJob(() =>
     Future.delayed(const Duration(seconds: 1), () => print("normalQ: 1")));
@@ -37,10 +37,10 @@ await asyncQ.start();
 // normalQ: 4
 ```
 
-#### Auto-Execute Queue
+#### Auto-start queue
 
 ```dart
-// Auto-start queue, executes immediately after adding tasks
+// Auto-start queue; jobs run as soon as they are added
 final autoAsyncQ = AsyncQueue.autoStart();
 
 autoAsyncQ.addJob(() =>
@@ -60,14 +60,14 @@ autoAsyncQ.addJob(() =>
 // AutoQ: 2
 ```
 
-#### Queue Monitoring
+#### Queue listeners
 
 ```dart
 final asyncQ = AsyncQueue();
 asyncQ.addQueueListener((event) => print("$event"));
 ```
 
-#### Queue Failure Retry
+#### Retry on failure
 
 ```dart
 q.addJob(() async {

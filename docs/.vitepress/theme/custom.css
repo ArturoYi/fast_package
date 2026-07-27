@@ -1,0 +1,81 @@
+/* Tight SVG viewBox + block img avoids extra gap under the logo in the nav bar */
+.VPNavBarTitle .logo img {
+  display: block;
+}
+
+/* Brand palette (docs + buttons) */
+:root {
+  --vp-c-brand-1: #0175c2;
+  --vp-c-brand-2: #0288d1;
+  --vp-c-brand-3: #01579b;
+  --vp-c-brand-soft: rgba(1, 117, 194, 0.14);
+
+  /* Home hero: soft wide glow (not a tight saturated blob) */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #0175c2 30%,
+    #41d1ff
+  );
+  --vp-home-hero-image-background-image: radial-gradient(
+    circle,
+    rgba(65, 209, 255, 0.78) 0%,
+    rgba(1, 117, 194, 0.52) 36%,
+    rgba(189, 52, 254, 0.38) 58%,
+    transparent 78%
+  );
+  --vp-home-hero-image-filter: blur(56px);
+}
+
+.dark {
+  --vp-c-brand-1: #4fc3f7;
+  --vp-c-brand-2: #29b6f6;
+  --vp-c-brand-3: #81d4fa;
+  --vp-c-brand-soft: rgba(79, 195, 247, 0.16);
+
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #4fc3f7 30%,
+    #bd34fe
+  );
+  --vp-home-hero-image-background-image: radial-gradient(
+    circle,
+    rgba(79, 195, 247, 0.62) 0%,
+    rgba(2, 136, 209, 0.46) 38%,
+    rgba(124, 77, 255, 0.34) 60%,
+    transparent 80%
+  );
+}
+
+/* Wide aura; stronger than before but still diffuse (not a hard split) */
+.VPHomeHero .image-bg {
+  width: 280px;
+  height: 280px;
+  opacity: 1;
+}
+
+@media (min-width: 640px) {
+  .VPHomeHero .image-bg {
+    width: 360px;
+    height: 360px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHomeHero .image-bg {
+    width: 440px;
+    height: 440px;
+  }
+}
+
+.VPHomeHero .image-container .image-src {
+  z-index: 1;
+}
+
+.VPHomeHero .image-container .image-src img {
+  filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.12));
+}
+
+.dark .VPHomeHero .image-container .image-src img {
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.35));
+}

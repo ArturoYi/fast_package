@@ -4,11 +4,11 @@ title: Contributing
 
 ## 🤝 Contributing
 
-We welcome all forms of contributions! If you have better ideas or find issues, please:
+We welcome contributions of all kinds. If you spot an issue or have an idea, you can:
 
-1. 🐛 Report bugs
-2. 💡 Suggest new features
-3. 📝 Improve documentation
-4. 🔧 Submit code
+1. 🐛 Report bugs  
+2. 💡 Propose features  
+3. 📝 Improve documentation  
+4. 🔧 Submit code  
 
-If you have better ideas, please let me know.
+If you have a better approach in mind, we'd love to hear it.

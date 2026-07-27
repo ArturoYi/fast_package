@@ -1,12 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" role="img" aria-label="Fast Package">
-  <rect x="2" y="4" width="24" height="24" rx="6" fill="#0175C2"/>
-  <path d="M10 10h8v2h-6v4h5v2h-5v4h8v2H8V10h2z" fill="#fff"/>
-  <path d="M36 22V10h3.2l6.4 8.4V10H49v12h-3.1l-6.5-8.6V22H36z" fill="currentColor"/>
-  <path d="M52 22l4.2-12h3.6l4.2 12h-3.3l-.7-2.2h-4.4l-.7 2.2H52zm6.8-4.8 1.5-4.7 1.5 4.7h-3z" fill="currentColor"/>
-  <path d="M68 22V10h5.8c3.2 0 5.2 1.7 5.2 4.5 0 2.1-1.1 3.6-3 4.1L79 22h-3.6l-2.8-2.9H71v2.9H68zm3-5.2h2.5c1.2 0 1.9-.6 1.9-1.6s-.7-1.6-1.9-1.6H71v3.2z" fill="currentColor"/>
-  <path d="M82 22V10h8.5v2.6H85v2.4h5v2.6H85v2.1h5.6V22H82z" fill="currentColor"/>
-  <path d="M104 22V10h3v10h-3z" fill="currentColor"/>
-  <path d="M109 22V10h5.4c3.8 0 6.1 2.2 6.1 6s-2.3 6-6.1 6H109zm3-2.6h2.2c2.1 0 3.2-1.2 3.2-3.4s-1.1-3.4-3.2-3.4H112V19.4z" fill="currentColor"/>
-  <path d="M124 22l4.2-12h3.6l4.2 12h-3.3l-.7-2.2h-4.4l-.7 2.2H124zm6.8-4.8 1.5-4.7 1.5 4.7h-3z" fill="currentColor"/>
-  <path d="M140 22V10h3v7.4l5.8-7.4h3.6l-5.9 7.5L153 22h-3.5l-3.8-5.2-2.7 3.4V22H140z" fill="currentColor"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="26 26 76 52" role="img" aria-label="Fast">
+  <defs>
+    <linearGradient id="fast-grad" x1="18" y1="78" x2="110" y2="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#41D1FF"/>
+      <stop offset="1" stop-color="#BD34FE"/>
+    </linearGradient>
+    <linearGradient id="fast-accent" x1="64" y1="32" x2="112" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0175C2"/>
+      <stop offset="1" stop-color="#7C4DFF"/>
+    </linearGradient>
+  </defs>
+  <path
+    fill="url(#fast-grad)"
+    d="M26 76V26h46l-6 18H42v14h20l-6 18H26z"
+  />
+  <path
+    fill="url(#fast-accent)"
+    d="M68 42 102 26 82 78 68 58V42z"
+  />
 </svg>

@@ -4,7 +4,7 @@ title: Gradient Borders
 
 ### Gradient Borders
 
-Add gradient border effects to containers.
+Add gradient borders around a container.
 
 ```dart
 import 'package:fast_package/fast_package.dart';

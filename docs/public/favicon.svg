@@ -1,4 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#0175C2"/>
-  <path d="M10 9h10v2h-7v4h6v2h-6v4h10v2H8V9h2z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="26 26 76 52" role="img" aria-label="Fast">
+  <defs>
+    <linearGradient id="fast-grad" x1="18" y1="78" x2="110" y2="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#41D1FF"/>
+      <stop offset="1" stop-color="#BD34FE"/>
+    </linearGradient>
+    <linearGradient id="fast-accent" x1="64" y1="32" x2="112" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0175C2"/>
+      <stop offset="1" stop-color="#7C4DFF"/>
+    </linearGradient>
+  </defs>
+  <path
+    fill="url(#fast-grad)"
+    d="M26 76V26h46l-6 18H42v14h20l-6 18H26z"
+  />
+  <path
+    fill="url(#fast-accent)"
+    d="M68 42 102 26 82 78 68 58V42z"
+  />
 </svg>

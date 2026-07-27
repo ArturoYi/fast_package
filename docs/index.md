@@ -1,35 +1,29 @@
 ---
-title: Fast Package
+layout: home
+
+hero:
+  name: Fast Package
+  text: 轻量的 Flutter 快速开发工具包
+  tagline: 工具方法、扩展与 UI 组件 · 零额外依赖 · 完整空安全
+  image:
+    src: /logo.svg
+    alt: Fast Package Logo
+  actions:
+    - theme: brand
+      text: 快速开始
+      link: /guide/getting-started
+    - theme: alt
+      text: 在 GitHub 查看
+      link: https://github.com/ArturoYi/fast_package
+
+features:
+  - icon: ⚡
+    title: 零额外依赖
+    details: 仅依赖 Flutter SDK，不引入第三方包，体积与维护成本可控。
+  - icon: 🛡️
+    title: 完整空安全
+    details: 面向 Dart 3 空安全编写，API 类型明确，减少运行时隐患。
+  - icon: 🎯
+    title: 开箱即用
+    details: 统一入口导入，常用能力与组件即引即用，适合快速迭代业务。
 ---
-
-一个基于纯 Flutter 实现的快速开发工具包，提供常用的工具方法、扩展函数和 UI 组件。
-
-## 🚀 功能特性
-
-- **🔄 异步控制**: 防抖、节流、速率限制功能
-- **📋 任务队列**: 顺序执行异步任务的队列管理
-- **🔧 扩展函数**: 丰富的字符串、数字、空安全扩展
-- **📐 尺寸工具**: 智能的尺寸计算和适配工具
-- **🎨 UI 组件**: 实用的 UI 组件和装饰器
-- **⚡ 高性能**: 基于纯 Flutter 实现，无额外依赖
-- **🛡️ 类型安全**: 完整的空安全支持
-
-## 🏃‍♂️ 快速开始
-
-### 安装
-
-请在安装前检查最新版本。如果新版本有任何问题，请使用以前的版本。
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  # add fast_package
-  fast_package: ^{latest version}
-```
-
-### 导入
-
-```dart
-import 'package:fast_package/fast_package.dart';
-```
