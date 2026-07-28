@@ -1,8 +1,9 @@
 ---
 title: Getting Started
+outline: [2, 3]
 ---
 
-## 🏃‍♂️ Quick Start
+## Quick start {#getting-started}
 
 ### Installation
 

@@ -1,8 +1,9 @@
 ---
 title: Contributing
+outline: [2, 3]
 ---
 
-## 🤝 Contributing
+## Contributing {#contributing}
 
 We welcome contributions of all kinds. If you spot an issue or have an idea, you can:
 

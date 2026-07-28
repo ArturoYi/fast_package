@@ -1,118 +1,166 @@
 ---
 title: Size Calculation Tools
+outline: [2, 3]
 ---
 
-### Size Calculation Tools
+## Overview {#overview}
 
-Smart sizing helpers—cover-fit behavior similar to CSS `object-fit: cover`.
+Top-level helpers `fastCoverScanSize` and `fastCoverScanScale` implement **cover** sizing similar to CSS **`object-fit: cover`**: given a parent box and a child’s intrinsic size, they compute either the **target size** or a **uniform scale factor** while preserving the child’s aspect ratio. Both take Flutter `Size` (width × height) and share the same algorithm.
 
-#### 1. Cover scan size (`fastCoverScanSize`)
+| API | Returns | Typical use |
+| --- | --- | --- |
+| `fastCoverScanSize` | `Size` | Layout (`SizedBox`, custom paint) |
+| `fastCoverScanScale` | `double` | `Transform.scale`, animation, multiply original dimensions |
 
-Computes the size a child needs to fully cover its parent while keeping aspect ratio.
+Clip overflow with `ClipRect` / `ClipRRect`; common cover patterns are in [Cover layout](/en/ui/cover-box).
 
-```dart
+---
+
+## Algorithm {#algorithm}
+
+1. **Zero dimensions** — If any side of `parentSize` or `childSize` is `0`, `fastCoverScanSize` returns **`childSize` unchanged**; `fastCoverScanScale` returns **`1.0`** (avoids division by zero).
+2. **Aspect ratio** — `aspect = width / height` for parent and child.
+3. **Pick an axis** (cover without distortion):
+   - Parent aspect **≥** child aspect: align by **width**, `scale = parent.width / child.width`
+   - Parent aspect **<** child aspect: align by **height**, `scale = parent.height / child.height`
+4. **Relationship** — With non-zero sizes, `fastCoverScanSize(parent, child)` equals  
+   `Size(child.width * s, child.height * s)` where `s = fastCoverScanScale(parent, child)`.  
+   **`s` may be less than 1** when the child is already larger but still needs cover alignment.
+
+---
+
+## `fastCoverScanSize` {#fast-cover-scan-size}
+
+Returns the smallest uniformly scaled `Size` that covers `parentSize` while keeping the child’s aspect ratio (one dimension matches the parent; the other may extend beyond and is usually clipped).
+
+### Examples {#fast-cover-scan-size-example}
+
+::: code-group
+
+```dart [Scale by width]
 import 'package:fast_package/fast_package.dart';
 
-// Cover scan size
-Size parentSize = Size(100, 100);
-Size childSize = Size(50, 80);
-Size result = fastCoverScanSize(parentSize, childSize);
-// Result: Size(100, 160) — scaled proportionally by width
-
-// Different aspect ratios
-Size parent = Size(200, 100);  // Wide rectangle
-Size child = Size(100, 100);   // Square
-Size result = fastCoverScanSize(parent, child);
-// Result: Size(200, 200) — scaled by width, square ratio preserved
+// Parent 100×100, child 50×80 — parent is “squarer”, align by width
+fastCoverScanSize(Size(100, 100), Size(50, 80));
+// Size(100.0, 160.0)
 ```
 
-#### 2. Cover scan scale (`fastCoverScanScale`)
+```dart [Scale by height]
+// Parent 200×100, child 100×100 — child is “squarer”, align by height
+fastCoverScanSize(Size(200, 100), Size(100, 100));
+// Size(200.0, 200.0)
+```
 
-Returns the scale factor for a child to cover its parent (not the final size).
+```dart [Zero dimension]
+fastCoverScanSize(Size(100, 0), Size(50, 80));
+// Size(50.0, 80.0) — original childSize
+```
+
+:::
+
+### API reference {#fast-cover-scan-size-api}
+
+---
+
+#### `fastCoverScanSize` {#fast-cover-scan-size-fn}
 
 ```dart
+Size fastCoverScanSize(Size parentSize, Size childSize);
+```
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `parentSize` | `Size` | yes | Parent (viewport) size. |
+| `childSize` | `Size` | yes | Child’s original size. |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| Cover size | `Size` | Same aspect ratio as `childSize`; if any side is zero, returns `childSize`. |
+
+---
+
+## `fastCoverScanScale` {#fast-cover-scan-scale}
+
+Returns the uniform scale factor `s` from the same rules; multiplying child width and height by `s` matches `fastCoverScanSize`.
+
+### Examples {#fast-cover-scan-scale-example}
+
+::: code-group
+
+```dart [Scale up to cover]
+fastCoverScanScale(Size(100, 100), Size(50, 50));
+// 2.0 — same aspect ratio, by width: 100 / 50
+```
+
+```dart [Wide child, height axis]
+// Parent 100×100, child 200×100 — height alignment is enough
+fastCoverScanScale(Size(100, 100), Size(200, 100));
+// 1.0
+```
+
+```dart [Flat child, height axis]
+// Parent 100×100, child 100×50
+fastCoverScanScale(Size(100, 100), Size(100, 50));
+// 2.0 — parent.height / child.height
+```
+
+:::
+
+### API reference {#fast-cover-scan-scale-api}
+
+---
+
+#### `fastCoverScanScale` {#fast-cover-scan-scale-fn}
+
+```dart
+double fastCoverScanScale(Size parentSize, Size childSize);
+```
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `parentSize` | `Size` | yes | Parent size. |
+| `childSize` | `Size` | yes | Child’s original size. |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| Scale factor | `double` | `1.0` if any side is zero; otherwise width- or height-based ratio (may be greater or less than 1). |
+
+---
+
+## Flutter notes {#flutter-practice}
+
+When you know container and image pixel sizes, compute scale first and clip overflow:
+
+```dart
+import 'package:flutter/material.dart';
 import 'package:fast_package/fast_package.dart';
 
-// Basic usage
-Size parentSize = Size(100, 100);
-Size childSize = Size(50, 50);
-double scale = fastCoverScanScale(parentSize, childSize);
-// Result: 2.0 — scale 2× by width
+Widget coverImage({
+  required Size containerSize,
+  required Size imageSize,
+  required ImageProvider image,
+}) {
+  final scale = fastCoverScanScale(containerSize, imageSize);
 
-// Child already covers the parent
-Size parent = Size(100, 100);
-Size child = Size(200, 100);  // Wider child
-double scale = fastCoverScanScale(parent, child);
-// Result: 1.0 — no scale; child already covers
-
-// Scale by height
-Size parent = Size(100, 100);
-Size child = Size(100, 50);   // Taller relative aspect
-double scale = fastCoverScanScale(parent, child);
-// Result: 2.0 — scale 2× by height
-```
-
-#### How it works
-
-1. **Compare aspect ratios** — width ÷ height for parent and child  
-2. **Pick a scale axis**  
-   - If parent aspect ratio ≥ child aspect ratio: scale by width  
-   - If parent aspect ratio < child aspect ratio: scale by height  
-3. **Edge cases** — e.g. zero width or height  
-
-#### Use cases
-
-- **Images** — fill the container without distortion  
-- **Video players** — fit content to arbitrary player sizes  
-- **Backgrounds** — full-bleed backgrounds  
-- **Responsive layout** — adapt content across screen sizes  
-
-#### Example
-
-```dart
-// Image adaptation
-class AdaptiveImage extends StatelessWidget {
-  final String imageUrl;
-  final double containerWidth;
-  final double containerHeight;
-
-  const AdaptiveImage({
-    required this.imageUrl,
-    required this.containerWidth,
-    required this.containerHeight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Original image size (assumed known here)
-        Size imageSize = Size(800, 600); // In practice, read from the image
-        Size containerSize = Size(containerWidth, containerHeight);
-        
-        // Adapted size
-        Size adaptedSize = fastCoverScanSize(containerSize, imageSize);
-        
-        // Or scale factor only
-        double scale = fastCoverScanScale(containerSize, imageSize);
-        
-        return Container(
-          width: containerWidth,
-          height: containerHeight,
-          child: ClipRect(
-            child: Transform.scale(
-              scale: scale,
-              child: Image.network(
-                imageUrl,
-                width: imageSize.width,
-                height: imageSize.height,
-                fit: BoxFit.cover,
-              ),
-            ),
+  return SizedBox(
+    width: containerSize.width,
+    height: containerSize.height,
+    child: ClipRect(
+      child: Center(
+        child: Transform.scale(
+          scale: scale,
+          child: Image(
+            image: image,
+            width: imageSize.width,
+            height: imageSize.height,
           ),
-        );
-      },
-    );
-  }
+        ),
+      ),
+    ),
+  );
 }
 ```
+
+For simple network images, `Image` with `BoxFit.cover` (see [Cover layout](/en/ui/cover-box)) is often enough. These functions shine when you need numeric sizes for **custom layout, animation, or non-`Image` children** (canvas, video frames).
+
+Typical cases: full-bleed backgrounds, video cover fit, thumbnail grids, responsive banners with fixed height.

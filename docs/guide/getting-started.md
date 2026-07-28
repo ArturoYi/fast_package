@@ -1,8 +1,9 @@
 ---
 title: 快速开始
+outline: [2, 3]
 ---
 
-## 🏃‍♂️ 快速开始
+## 快速开始 {#getting-started}
 
 ### 安装
 

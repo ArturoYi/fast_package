@@ -1,82 +1,231 @@
 ---
 title: Extensions
+outline: [2, 3]
 ---
 
-### String extensions
+## Overview {#overview}
 
-Rich string conversion and formatting helpers.
+Import `package:fast_package/fast_package.dart` to use Dart **extensions** on `String` / nullable strings, nullable `bool` / `int` / `double` / `num`, and non-null `num`. APIs are **getters or instance methods**; they do not change the underlying types.
 
-```dart
-// Convert to lower camelCase
-String get toCamelCase;
-// Examples:
-// "hello_world" => "helloWorld"
-// "user-name" => "userName"
-// "FirstName" => "firstName"
+| Extension | Receiver | Summary |
+| --- | --- | --- |
+| `FastStringExtension` | `String` | camel / snake / kebab case, `isValidUrl` |
+| `FastStringNullSafeExtension` | `String?` | empty defaults, optional default, non-null assert |
+| `FastBoolNullSafeExtension` | `bool?` | default `false` / `true`, optional default |
+| `FastNumExtension` | `num` | range check, divisibility |
+| `FastNumNullSafeExtension` etc. | `num?` / `int?` / `double?` | zero defaults and `nullSafeThrow` |
 
-// Convert to PascalCase (upper camelCase)
-String get toPascalCase;
-// Examples:
-// "hello_world" => "HelloWorld"
-// "user-name" => "UserName"
-// "firstName" => "FirstName"
+---
 
-// Convert to UPPER_SNAKE_CASE
-String get toSnakeCase;
-// Examples:
-// "helloWorld" => "HELLO_WORLD"
-// "user-name" => "USER_NAME"
-// "FirstName" => "FIRST_NAME"
+## String case {#string-case}
 
-// Convert to lower_snake_case
-String get toSnakeCaseLower;
-// Examples:
-// "helloWorld" => "hello_world"
-// "user-name" => "user_name"
-// "FirstName" => "first_name"
+`FastStringExtension` splits on word boundaries (spaces, `-`, `_`, `.`, and camelCase breaks), then rejoins. Empty string → `''`.
 
-// Convert to kebab-case
-String get toKebabCase;
-// Examples:
-// "helloWorld" => "hello-world"
-// "user_name" => "user-name"
-// "FirstName" => "first-name"
-```
-
-### Null-safety extensions
-
-Safe null handling for common types.
+### Examples {#string-case-example}
 
 ```dart
-// String
-String? str = null;
-print(str.nullSafeOrEmpty); // ""
-print(str.nullSafe("default")); // "default"
-print(str.nullSafeThrow()); // Throws: Value should not be null
+'hello_world'.toCamelCase;      // helloWorld
+'user-name'.toPascalCase;       // UserName
+'helloWorld'.toSnakeCase;       // HELLO_WORLD
+'FirstName'.toSnakeCaseLower;   // first_name
+'hello_world'.toKebabCase;      // hello-world
 
-// Numbers
-int? num = null;
-print(num.nullSafeOrZero); // 0
-print(num.nullSafe(42)); // 42
-
-// Booleans
-bool? flag = null;
-print(flag.nullSafeOrFalse); // false
-print(flag.nullSafe(true)); // true
+'https://example.com'.isValidUrl; // true
 ```
 
-### Number extensions
+### API reference {#string-case-api}
 
-Formatting and conversion utilities.
+---
+
+#### `toCamelCase` / `toPascalCase` {#string-to-camel-pascal}
+
+Lower camelCase (first word lowercase) and PascalCase (each word capitalized).
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `String` (getter) | Converted name; `''` when `isEmpty`. |
+
+---
+
+#### `toSnakeCase` / `toSnakeCaseLower` {#string-to-snake}
+
+UPPER_SNAKE and lower_snake.
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `String` (getter) | Words joined with `_`. |
+
+---
+
+#### `toKebabCase` {#string-to-kebab}
+
+Lowercase kebab-case with `-`.
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `String` (getter) | Words joined with `-`. |
+
+---
+
+#### `isValidUrl` {#string-is-valid-url}
+
+Rough URL check via built-in regex (optional `http`/`https`).
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `bool` (getter) | `true` when matched. |
+
+---
+
+## Nullable strings {#string-null-safe}
+
+`FastStringNullSafeExtension on String?`.
+
+### Examples {#string-null-safe-example}
 
 ```dart
-// Formatting
-double price = 1234.5678;
-print(price.toCurrency()); // "¥1,234.57"
-print(price.toPercent()); // "123,456.78%"
+String? name;
+name.nullSafeOrEmpty;           // ''
+name.nullSafe(value: 'guest');  // guest
+name.isNullOrEmpty;             // true
 
-// Conversion
-int count = 1000;
-print(count.toFileSize()); // "1.0 KB"
-print(count.toDuration()); // "16 minutes 40 seconds"
+name.nullSafeThrow(); // throws ArgumentError when null (optional message / exception)
 ```
+
+### API reference {#string-null-safe-api}
+
+---
+
+#### `nullSafeOrEmpty` {#string-null-safe-or-empty}
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `String` (getter) | `null` → `''`. |
+
+---
+
+#### `nullSafe` {#string-null-safe-null-safe}
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `value` | `String?` | no | Fallback when `null`; still empty → `nullSafeOrEmpty`. |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| — | `String` | Use `this` when non-null; else `value` then empty fallback. |
+
+---
+
+#### `nullSafeThrow` {#string-null-safe-throw}
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `exception` | `Exception?` | no | Custom exception; default `ArgumentError`. |
+| `message` | `String?` | no | Default message when no `exception`. |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| — | `String` | Returns self when non-null. |
+
+---
+
+#### `isNullOrEmpty` {#string-is-null-or-empty}
+
+|  | Type | Description |
+| --- | --- | --- |
+| Return | `bool` (getter) | `true` for `null` or `''`. |
+
+---
+
+## Nullable booleans {#bool-null-safe}
+
+`FastBoolNullSafeExtension on bool?`.
+
+### Examples {#bool-null-safe-example}
+
+```dart
+bool? flag;
+flag.nullSafeOrFalse;  // false
+flag.nullSafeOrTrue;   // true
+flag.nullSafe(value: true); // true
+```
+
+### API reference {#bool-null-safe-api}
+
+| API | Return | Description |
+| --- | --- | --- |
+| `nullSafeOrFalse` | `bool` | `null` → `false` |
+| `nullSafeOrTrue` | `bool` | `null` → `true` |
+| `nullSafe({bool? value})` | `bool` | Fallback via `value`, then `nullSafeOrFalse` |
+| `nullSafeThrow({Exception? exception})` | `bool` | Throw when null; else self |
+
+---
+
+## Number utilities {#num-utils}
+
+`FastNumExtension on num` (non-null).
+
+### Examples {#num-utils-example}
+
+```dart
+5.isBetween(1, 10);   // true (closed interval; argument order ignored)
+10.isDivisibleBy(2);  // true
+10.isDivisibleBy(0);  // false (divisor 0)
+```
+
+### API reference {#num-utils-api}
+
+---
+
+#### `isBetween` {#num-is-between}
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `betweenOne` | `num` | yes | One end of the interval |
+| `betweenTwo` | `num` | yes | Other end |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| — | `bool` | Whether `this` lies in the closed interval |
+
+---
+
+#### `isDivisibleBy` {#num-is-divisible-by}
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `divisor` | `num` | yes | Divisor; `0` → `false` |
+
+| Return | Type | Description |
+| --- | --- | --- |
+| — | `bool` | Whether division is exact |
+
+---
+
+## Nullable numbers {#num-null-safe}
+
+Separate extensions for `int?`, `double?`, and `num?` with the same shape; zero defaults are `0`, `0.0`, and `0`.
+
+### Examples {#num-null-safe-example}
+
+```dart
+int? count;
+count.nullSafeOrEmpty;        // 0
+count.nullSafe(value: 42);    // 42
+count.nullSafeThrow();        // null → ArgumentError
+
+double? rate;
+rate.nullSafeOrEmpty;         // 0.0
+```
+
+### API reference {#num-null-safe-api}
+
+Each type provides:
+
+| API | Description |
+| --- | --- |
+| `nullSafeOrEmpty` | Zero value when `null` |
+| `nullSafe({T? value})` | Optional default, then zero fallback |
+| `nullSafeThrow({Exception? exception})` | Non-null assert |
+
+Types: `FastIntNullSafeExtension`, `FastDoubleNullSafeExtension`, `FastNumNullSafeExtension`.

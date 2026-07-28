@@ -1,7 +1,10 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig, type HeadConfig } from 'vitepress'
 
-const sharedHead = [
-  ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+const siteBase = '/fast_package/'
+
+/** head 里的绝对路径不会自动加 base，需与 siteBase 一致（见 themeConfig.logo 的自动处理） */
+const sharedHead: HeadConfig[] = [
+  ['link', { rel: 'icon', href: `${siteBase}favicon.svg`, type: 'image/svg+xml' }],
 ]
 
 const sharedLogo = {
@@ -76,7 +79,7 @@ const sidebarZhGroups = [
     text: 'UI 组件',
     items: [
       { text: '渐变边框', link: '/ui/gradient-border' },
-      { text: '覆盖容器', link: '/ui/cover-box' },
+      { text: 'Cover 布局', link: '/ui/cover-box' },
     ],
   },
   {
@@ -114,7 +117,7 @@ const sidebarEnGroups = [
     text: 'UI components',
     items: [
       { text: 'Gradient Borders', link: '/en/ui/gradient-border' },
-      { text: 'Cover Box', link: '/en/ui/cover-box' },
+      { text: 'Cover layout', link: '/en/ui/cover-box' },
     ],
   },
   {
@@ -146,7 +149,7 @@ const docSidebarPrefixesEn = [
 ]
 
 export default defineConfig({
-  base: '/fast_package/',
+  base: siteBase,
   title: 'Fast Package',
   description: 'Flutter 快速开发工具包文档',
   head: sharedHead,
@@ -171,6 +174,10 @@ export default defineConfig({
           { text: 'GitHub', link: 'https://github.com/ArturoYi/fast_package' },
         ],
         sidebar: sidebarForPrefixes(docSidebarPrefixesZh, sidebarZhGroups),
+        outline: {
+          level: [2, 4],
+          label: '本页大纲',
+        },
         socialLinks: [
           { icon: 'github', link: 'https://github.com/ArturoYi/fast_package' },
         ],
@@ -196,6 +203,10 @@ export default defineConfig({
           { text: 'GitHub', link: 'https://github.com/ArturoYi/fast_package' },
         ],
         sidebar: sidebarForPrefixes(docSidebarPrefixesEn, sidebarEnGroups),
+        outline: {
+          level: [2, 4],
+          label: 'On this page',
+        },
         socialLinks: [
           { icon: 'github', link: 'https://github.com/ArturoYi/fast_package' },
         ],
