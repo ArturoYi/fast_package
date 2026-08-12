@@ -1,0 +1,34 @@
+# When .pubignore exists, it overrides .gitignore for pub publish.
+# Keep this file in sync with publish-relevant .gitignore rules.
+
+# From .gitignore (Flutter/Dart)
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+*.iml
+*.ipr
+*.iws
+.idea/
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+.packages
+build/
+.fvm/
+
+# VitePress site stays as docs/ in git; pub expects doc/ and
+# should not receive the documentation site sources.
+docs/
+
+# Internal project tooling
+openspec/
+.cursor/
+.pnpm-store/
+coverage/
