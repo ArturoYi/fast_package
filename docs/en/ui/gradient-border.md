@@ -3,6 +3,12 @@ title: Gradient Borders
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/ui_kit/fast_gradient_borders" target="_blank" rel="noreferrer">Source on GitHub</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/ui_kit/fast_gradient_borders/</code>
+</p>
+
 ## Overview {#overview}
 
 `GradientBoxBorders` is a custom `BoxBorder` for painting a **gradient stroke** on `BoxDecoration.border` (instead of a solid `Border.all`). It supports rectangles (with optional `borderRadius`) and `BoxShape.circle`. Colors come from any Flutter `Gradient` (e.g. `LinearGradient`).

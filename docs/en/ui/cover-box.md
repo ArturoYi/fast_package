@@ -3,6 +3,12 @@ title: Cover Layout
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_scan" target="_blank" rel="noreferrer">Source on GitHub</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_scan/</code>
+</p>
+
 ## Overview {#overview}
 
 **Cover** layout matches CSS `object-fit: cover`: preserve aspect ratio, fill a fixed box, clip overflow. This package does **not** ship a widget named `CoverBox`. In Flutter, use `BoxFit.cover`, or when you need exact sizes use [Size calculation tools](/en/features/scan-size) (`fastCoverScanSize` / `fastCoverScanScale`).

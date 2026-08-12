@@ -3,6 +3,12 @@ title: 异步任务队列
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_async_queue" target="_blank" rel="noreferrer">GitHub 源码</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_async_queue/</code>
+</p>
+
 ## 概览 {#overview}
 
 `FastAsyncQueue` 按 **FIFO** 顺序串行执行异步任务（`AsyncJob`），适合「必须一条条做完」的场景（上传队列、串行 API、离线同步）。支持手动 `start()` 与 **自动启动** 工厂、任务 **label** 与 `JobInfo` 跟踪、失败后在任务内调用 `retry()` 的重试，以及 `QueueEvent` 监听。

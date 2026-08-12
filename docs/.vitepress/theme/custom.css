@@ -79,3 +79,35 @@
 .dark .VPHomeHero .image-container .image-src img {
   filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.35));
 }
+
+/* Feature docs: muted GitHub source row under the page title */
+.doc-source {
+  margin: -0.4rem 0 1.5rem;
+  font-size: 0.875rem;
+  color: var(--vp-c-text-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.doc-source a {
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.doc-source a:hover {
+  text-decoration: underline;
+}
+
+.doc-source code {
+  font-size: 0.8em;
+  color: var(--vp-c-text-2);
+  background: transparent;
+  padding: 0;
+}
+
+.doc-source a code {
+  color: inherit;
+}

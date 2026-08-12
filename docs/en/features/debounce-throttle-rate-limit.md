@@ -3,6 +3,16 @@ title: Debounce, Throttle, and Rate Limit
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <span>Source on GitHub</span>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_debounce" target="_blank" rel="noreferrer"><code>fast_debounce/</code></a>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_throttle" target="_blank" rel="noreferrer"><code>fast_throttle/</code></a>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_rate_limit" target="_blank" rel="noreferrer"><code>fast_rate_limit/</code></a>
+</p>
+
 ## Overview {#overview}
 
 Three static utilities built on `dart:async` `Timer` to tame high-frequency side effects (rapid taps, search input, scroll handlers). Each uses a `tag` so different call sites do not interfere.

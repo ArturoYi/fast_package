@@ -3,6 +3,12 @@ title: 渐变边框
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/ui_kit/fast_gradient_borders" target="_blank" rel="noreferrer">GitHub 源码</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/ui_kit/fast_gradient_borders/</code>
+</p>
+
 ## 概览 {#overview}
 
 `GradientBoxBorders` 是自定义 `BoxBorder`，用于在 `Container`、`DecoratedBox` 等 `BoxDecoration.border` 上绘制**渐变描边**（非纯色 `Border.all`）。支持矩形（可配合 `borderRadius` 圆角）与 `BoxShape.circle` 圆形；渐变由 Flutter `Gradient`（如 `LinearGradient`）定义。

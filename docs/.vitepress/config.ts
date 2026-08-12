@@ -80,6 +80,7 @@ const sidebarZhGroups = [
     items: [
       { text: '渐变边框', link: '/ui/gradient-border' },
       { text: 'Cover 布局', link: '/ui/cover-box' },
+      { text: 'Shimmer 骨架屏', link: '/ui/shimmer' },
     ],
   },
   {
@@ -118,6 +119,7 @@ const sidebarEnGroups = [
     items: [
       { text: 'Gradient Borders', link: '/en/ui/gradient-border' },
       { text: 'Cover layout', link: '/en/ui/cover-box' },
+      { text: 'Shimmer skeletons', link: '/en/ui/shimmer' },
     ],
   },
   {

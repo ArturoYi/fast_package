@@ -3,6 +3,12 @@ title: Extensions
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_extension" target="_blank" rel="noreferrer">Source on GitHub</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_extension/</code>
+</p>
+
 ## Overview {#overview}
 
 Import `package:fast_package/fast_package.dart` to use Dart **extensions** on `String` / nullable strings, nullable `bool` / `int` / `double` / `num`, and non-null `num`. APIs are **getters or instance methods**; they do not change the underlying types.

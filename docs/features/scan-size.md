@@ -3,6 +3,12 @@ title: 尺寸计算工具
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_scan" target="_blank" rel="noreferrer">GitHub 源码</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_scan/</code>
+</p>
+
 ## 概览 {#overview}
 
 顶层函数 `fastCoverScanSize` 与 `fastCoverScanScale` 实现类似 CSS **`object-fit: cover`** 的覆盖适配：在保持子元素宽高比的前提下，计算「铺满父容器」所需的**目标尺寸**或**统一缩放因子**。二者算法一致，入参均为 Flutter `Size`（宽 × 高）。

@@ -3,6 +3,16 @@ title: 防抖、节流、速率限制
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <span>GitHub 源码</span>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_debounce" target="_blank" rel="noreferrer"><code>fast_debounce/</code></a>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_throttle" target="_blank" rel="noreferrer"><code>fast_throttle/</code></a>
+  <span aria-hidden="true">·</span>
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_rate_limit" target="_blank" rel="noreferrer"><code>fast_rate_limit/</code></a>
+</p>
+
 ## 概览 {#overview}
 
 基于 `dart:async` `Timer` 的静态工具类，用于控制高频触发的副作用（如按钮连点、搜索框输入、滚动回调）。三者均通过 `tag` 区分不同业务场景，互不干扰。

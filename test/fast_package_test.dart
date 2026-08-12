@@ -9,6 +9,9 @@ import 'fast_async_queue_test/fast_async_queue_test.dart' as fast_async_queue_te
 import 'fast_async_queue_test/fast_async_queue_retry_test.dart' as fast_async_queue_retry_test;
 import 'fast_async_queue_test/fast_async_queue_info_test.dart' as fast_async_queue_info_test;
 import 'fast_scan_test/fast_scan_test.dart' as fast_scan_test;
+import 'fast_shimmer_test/fast_shimmer_test.dart' as fast_shimmer_test;
+import 'fast_shimmer_test/fast_shimmer_scope_test.dart' as fast_shimmer_scope_test;
+import 'fast_shimmer_test/fast_shimmer_theme_test.dart' as fast_shimmer_theme_test;
 
 void main() {
   fast_debounce_test.main();
@@ -20,4 +23,7 @@ void main() {
   fast_async_queue_retry_test.main();
   fast_async_queue_info_test.main();
   fast_scan_test.main();
+  fast_shimmer_test.main();
+  fast_shimmer_scope_test.main();
+  fast_shimmer_theme_test.main();
 }

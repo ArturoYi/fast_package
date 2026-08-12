@@ -3,6 +3,12 @@ title: Async Task Queue
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_async_queue" target="_blank" rel="noreferrer">Source on GitHub</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_async_queue/</code>
+</p>
+
 ## Overview {#overview}
 
 `FastAsyncQueue` runs async jobs (`AsyncJob`) **serially in FIFO order**—upload queues, sequential APIs, offline sync, etc. Supports manual `start()` vs **auto-start** factory, **label** + `JobInfo` tracking, in-task `retry()` with a retry budget, and `QueueEvent` listeners.

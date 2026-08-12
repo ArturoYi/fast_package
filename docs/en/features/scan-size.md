@@ -3,6 +3,12 @@ title: Size Calculation Tools
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_scan" target="_blank" rel="noreferrer">Source on GitHub</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_scan/</code>
+</p>
+
 ## Overview {#overview}
 
 Top-level helpers `fastCoverScanSize` and `fastCoverScanScale` implement **cover** sizing similar to CSS **`object-fit: cover`**: given a parent box and a child’s intrinsic size, they compute either the **target size** or a **uniform scale factor** while preserving the child’s aspect ratio. Both take Flutter `Size` (width × height) and share the same algorithm.

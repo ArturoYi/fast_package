@@ -3,6 +3,12 @@ title: Cover 布局
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_scan" target="_blank" rel="noreferrer">GitHub 源码</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_scan/</code>
+</p>
+
 ## 概览 {#overview}
 
 「Cover」指类似 CSS `object-fit: cover` 的铺满效果：内容保持宽高比，填满固定尺寸的容器，超出部分裁剪。本包 **未提供** 名为 `CoverBox` 的 Widget；在 Flutter 中通常用 `BoxFit.cover`，或在需要精确像素时用 [尺寸计算工具](/features/scan-size) 中的 `fastCoverScanSize` / `fastCoverScanScale`。

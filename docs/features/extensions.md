@@ -3,6 +3,12 @@ title: 扩展函数
 outline: [2, 3]
 ---
 
+<p class="doc-source">
+  <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_extension" target="_blank" rel="noreferrer">GitHub 源码</a>
+  <span aria-hidden="true">·</span>
+  <code>lib/src/utils/fast_extension/</code>
+</p>
+
 ## 概览 {#overview}
 
 通过 `import 'package:fast_package/fast_package.dart';` 使用 Dart **extension**，在 `String` / 可空字符串、可空 `bool` / `int` / `double` / `num` 以及非空 `num` 上提供命名转换、空值默认值与常用数值判断。扩展方法为 **getter 或实例方法**，不改变原类型定义。

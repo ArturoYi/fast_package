@@ -23,5 +23,15 @@ export 'src/utils/fast_async_queue/fast_async_node.dart' hide FastAsyncNode;
 // ---------------------------ui kit---------------------------
 export 'src/ui_kit/fast_gradient_borders/gradient_box_borders.dart';
 
+// shimmer skeleton（显式骨架；不含 auto-detect）
+export 'src/ui_kit/fast_shimmer/fast_shimmer.dart';
+export 'src/ui_kit/fast_shimmer/fast_shimmer_direction.dart';
+export 'src/ui_kit/fast_shimmer/fast_shimmer_scope.dart';
+export 'src/ui_kit/fast_shimmer/fast_shimmer_theme.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_box.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_circle.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_list.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_text.dart';
+
 // ---------------------------scan utils---------------------------
 export 'src/utils/fast_scan/fast_scan.dart';
