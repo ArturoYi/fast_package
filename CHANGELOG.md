@@ -18,6 +18,7 @@
 - cover_size
 * Fixed bugs
 
-## Unreleased
+## 0.0.4
 
-* **BREAKING**: 文档入口由 `docs/README.zh-CN.md` / `docs/README.en-US.md` 迁移至 VitePress 站点（<https://arturoyi.github.io/fast_package/>）。旧版单文件备份位于 `docs/.archive/`。
+* Added shimmer UI component
+* Docs migrated to VitePress site（<https://arturoyi.github.io/fast_package/>）
