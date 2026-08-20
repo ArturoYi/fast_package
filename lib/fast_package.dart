@@ -33,5 +33,12 @@ export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_circle.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_list.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_text.dart';
 
+// toast（showToast / showCustomToast；无 type）
+export 'src/ui_kit/fast_toast/fast_toast.dart';
+export 'src/ui_kit/fast_toast/fast_toast_overlay.dart';
+export 'src/ui_kit/fast_toast/fast_toast_theme.dart';
+export 'src/ui_kit/fast_toast/fast_toast_config.dart';
+export 'src/ui_kit/fast_toast/fast_toast_position.dart';
+
 // ---------------------------scan utils---------------------------
 export 'src/utils/fast_scan/fast_scan.dart';

@@ -22,3 +22,7 @@
 
 * Added shimmer UI component
 * Docs migrated to VitePress site（<https://arturoyi.github.io/fast_package/>）
+
+## 0.0.5
+
+* Added global Overlay Toast: `showToast` / `showCustomToast`

@@ -1,4 +1,5 @@
 import 'package:example/routes/routes.dart';
+import 'package:fast_package/fast_package.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,8 +20,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       builder: (context, child) {
-        return SizedBox(
-          child: child,
+        return FastToastOverlay(
+          child: child ?? const SizedBox.shrink(),
         );
       },
     );
