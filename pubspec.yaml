@@ -1,11 +1,28 @@
 name: fast_package
-description: 一个帮助您快速开发的Flutter 包，如果您发现任何需要改进的地方，或者想要请求某个功能，请在GitHub上提交issue，感谢您的反馈和贡献。
+description: "A lightweight Flutter toolkit with debounce/throttle, async queue, extensions, and UI widgets (Toast, Shimmer, gradient borders). Depends only on the Flutter SDK."
 version: 0.0.5
 homepage: https://arturoyi.github.io/fast_package/
+repository: https://github.com/ArturoYi/fast_package
+issue_tracker: https://github.com/ArturoYi/fast_package/issues
+documentation: https://arturoyi.github.io/fast_package/
+topics:
+  - flutter
+  - widget
+  - ui
+  - utilities
+  - toast
 
 environment:
   sdk: '>=3.3.4 <4.0.0'
-  flutter: ">=1.17.0"
+  flutter: ">=3.19.6"
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 
 dependencies:
   flutter:
