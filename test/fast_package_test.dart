@@ -12,6 +12,7 @@ import 'fast_scan_test/fast_scan_test.dart' as fast_scan_test;
 import 'fast_shimmer_test/fast_shimmer_test.dart' as fast_shimmer_test;
 import 'fast_shimmer_test/fast_shimmer_scope_test.dart' as fast_shimmer_scope_test;
 import 'fast_shimmer_test/fast_shimmer_theme_test.dart' as fast_shimmer_theme_test;
+import 'fast_refresh_test/fast_refresh_test.dart' as fast_refresh_test;
 
 void main() {
   fast_debounce_test.main();
@@ -26,4 +27,5 @@ void main() {
   fast_shimmer_test.main();
   fast_shimmer_scope_test.main();
   fast_shimmer_theme_test.main();
+  fast_refresh_test.main();
 }

@@ -2,6 +2,7 @@ import 'package:example/pages/debounce_example/debounce_example.dart';
 import 'package:example/pages/gradient_border_example/gradient_border_example.dart';
 import 'package:example/pages/index/example_index.dart';
 import 'package:example/pages/shimmer_example/shimmer_example.dart';
+import 'package:example/pages/refresh_example/refresh_example.dart';
 import 'package:example/pages/toast_example/toast_example.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -24,6 +25,8 @@ class ExampleRoute {
   static String shimmer = '/shimmer';
   //toast
   static String toast = '/toast';
+  //refresh
+  static String refresh = '/refresh';
 
   static Map<String, Widget Function(BuildContext)> get routes => {
         index: (context) => ExampleIndex(),
@@ -32,5 +35,6 @@ class ExampleRoute {
         border: (context) => const GradientBorderExample(),
         shimmer: (context) => const ShimmerExample(),
         toast: (context) => const ToastExample(),
+        refresh: (context) => const RefreshExample(),
       };
 }

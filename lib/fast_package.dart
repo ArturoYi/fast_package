@@ -40,5 +40,8 @@ export 'src/ui_kit/fast_toast/fast_toast_theme.dart';
 export 'src/ui_kit/fast_toast/fast_toast_config.dart';
 export 'src/ui_kit/fast_toast/fast_toast_position.dart';
 
+// refresh（下拉刷新 / 上拉加载；对齐 EasyRefresh 核心物理与状态机）
+export 'src/ui_kit/fast_refresh/fast_refresh.dart';
+
 // ---------------------------scan utils---------------------------
 export 'src/utils/fast_scan/fast_scan.dart';

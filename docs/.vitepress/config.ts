@@ -82,6 +82,7 @@ const sidebarZhGroups = [
       { text: 'Cover 布局', link: '/ui/cover-box' },
       { text: 'Shimmer 骨架屏', link: '/ui/shimmer' },
       { text: 'Toast', link: '/ui/toast' },
+      { text: 'Refresh 刷新加载', link: '/ui/refresh' },
     ],
   },
   {
@@ -122,6 +123,7 @@ const sidebarEnGroups = [
       { text: 'Cover layout', link: '/en/ui/cover-box' },
       { text: 'Shimmer skeletons', link: '/en/ui/shimmer' },
       { text: 'Toast', link: '/en/ui/toast' },
+      { text: 'Refresh', link: '/en/ui/refresh' },
     ],
   },
   {

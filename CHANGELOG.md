@@ -26,3 +26,8 @@
 ## 0.0.5
 
 * Added global Overlay Toast: `showToast` / `showCustomToast`
+
+## 0.0.6
+
+* Added `FastRefresh`: EasyRefresh-aligned pull-to-refresh and load-more (custom physics, full indicator state machine, Classic header/footer, controller, `noMore`, builder / locator / refreshOnStart)
+* Documented Widget constructor vs `FastRefresh.builder`; example splits `refresh_example/widget` and `refresh_example/builder`
