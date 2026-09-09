@@ -9,6 +9,8 @@ outline: [2, 3]
   <code>lib/src/utils/fast_async_queue/</code>
 </p>
 
+<DocCredit module="async-queue" />
+
 ## Overview {#overview}
 
 `FastAsyncQueue` runs async jobs (`AsyncJob`) **serially in FIFO order**—upload queues, sequential APIs, offline sync, etc. Supports manual `start()` vs **auto-start** factory, **label** + `JobInfo` tracking, in-task `retry()` with a retry budget, and `QueueEvent` listeners.

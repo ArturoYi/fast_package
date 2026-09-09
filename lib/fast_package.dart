@@ -33,12 +33,18 @@ export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_circle.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_list.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_text.dart';
 
-// toast（showToast / showCustomToast；无 type）
+// toast（showToast；可选 builder；无 type）
 export 'src/ui_kit/fast_toast/fast_toast.dart';
 export 'src/ui_kit/fast_toast/fast_toast_overlay.dart';
 export 'src/ui_kit/fast_toast/fast_toast_theme.dart';
 export 'src/ui_kit/fast_toast/fast_toast_config.dart';
 export 'src/ui_kit/fast_toast/fast_toast_position.dart';
+
+// loading（showLoading；可选 builder；仅居中）
+export 'src/ui_kit/fast_loading/fast_loading.dart';
+export 'src/ui_kit/fast_loading/fast_loading_overlay.dart';
+export 'src/ui_kit/fast_loading/fast_loading_theme.dart';
+export 'src/ui_kit/fast_loading/fast_loading_config.dart';
 
 // refresh（下拉刷新 / 上拉加载；对齐 EasyRefresh 核心物理与状态机）
 export 'src/ui_kit/fast_refresh/fast_refresh.dart';

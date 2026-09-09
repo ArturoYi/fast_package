@@ -13,6 +13,8 @@ outline: [2, 3]
   <a href="https://github.com/ArturoYi/fast_package/tree/master/lib/src/utils/fast_rate_limit" target="_blank" rel="noreferrer"><code>fast_rate_limit/</code></a>
 </p>
 
+<DocCredit module="debounce" />
+
 ## Overview {#overview}
 
 Three static utilities built on `dart:async` `Timer` to tame high-frequency side effects (rapid taps, search input, scroll handlers). Each uses a `tag` so different call sites do not interfere.

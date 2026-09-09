@@ -9,6 +9,8 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_gradient_borders/</code>
 </p>
 
+<DocCredit module="gradient-border" />
+
 ## 概览 {#overview}
 
 `GradientBoxBorders` 是自定义 `BoxBorder`，用于在 `Container`、`DecoratedBox` 等 `BoxDecoration.border` 上绘制**渐变描边**（非纯色 `Border.all`）。支持矩形（可配合 `borderRadius` 圆角）与 `BoxShape.circle` 圆形；渐变由 Flutter `Gradient`（如 `LinearGradient`）定义。

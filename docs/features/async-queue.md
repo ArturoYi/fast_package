@@ -9,6 +9,8 @@ outline: [2, 3]
   <code>lib/src/utils/fast_async_queue/</code>
 </p>
 
+<DocCredit module="async-queue" />
+
 ## 概览 {#overview}
 
 `FastAsyncQueue` 按 **FIFO** 顺序串行执行异步任务（`AsyncJob`），适合「必须一条条做完」的场景（上传队列、串行 API、离线同步）。支持手动 `start()` 与 **自动启动** 工厂、任务 **label** 与 `JobInfo` 跟踪、失败后在任务内调用 `retry()` 的重试，以及 `QueueEvent` 监听。

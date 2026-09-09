@@ -9,6 +9,8 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_shimmer/</code>
 </p>
 
+<DocCredit module="shimmer" />
+
 ## 概览 {#overview}
 
 `FastShimmer` 系列提供**手写骨架屏**与同步扫光动画：用 `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList` 拼布局，由 `FastShimmerScope` 用单个 `AnimationController` + `ShaderMask` 驱动整棵子树同相位扫光。

@@ -2,30 +2,30 @@ import 'package:flutter/widgets.dart';
 
 import 'fast_toast_config.dart';
 
-/// Enqueued toast payload: either a text message or a custom [Widget].
-/// 入队的 Toast 载荷：纯文本或自定义 [Widget]。
+/// Enqueued toast payload: either a text message or a custom [WidgetBuilder].
+/// 入队的 Toast 载荷：纯文本或自定义 [WidgetBuilder]。
 final class FastToastRequest {
   /// Text toast shown with the default themed panel.
   /// 使用默认主题面板展示的文本 Toast。
   const FastToastRequest.text(
     this.message, {
     this.config = const FastToastConfig(),
-  }) : child = null;
+  }) : builder = null;
 
   /// Custom-widget toast; the host does not wrap default panel chrome.
   /// 自定义 Widget Toast；宿主不再套默认面板。
   const FastToastRequest.custom(
-    this.child, {
+    this.builder, {
     this.config = const FastToastConfig(),
   }) : message = null;
 
-  /// Message for a text toast; `null` when [child] is set.
-  /// 文本 Toast 的文案；设置 [child] 时为 `null`。
+  /// Message for a text toast; `null` when [builder] is set.
+  /// 文本 Toast 的文案；设置 [builder] 时为 `null`。
   final String? message;
 
-  /// Custom content; `null` when [message] is set.
-  /// 自定义内容；设置 [message] 时为 `null`。
-  final Widget? child;
+  /// Builds custom content; `null` when [message] is set.
+  /// 构建自定义内容；设置 [message] 时为 `null`。
+  final WidgetBuilder? builder;
 
   /// Behavior config for this request.
   /// 本条请求的行为配置。

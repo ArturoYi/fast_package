@@ -9,9 +9,11 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_refresh/</code>
 </p>
 
+<DocCredit module="refresh" />
+
 ## Overview {#overview}
 
-`FastRefresh` ports EasyRefresh’s core physics and state machine: custom `ScrollPhysics` for friction / rebound / overscroll, and Header/Footer notifiers that drive
+`FastRefresh` uses custom `ScrollPhysics` for friction / rebound / overscroll, and Header/Footer notifiers that drive
 
 `inactive → drag → armed → ready → processing → processed → done`.
 
@@ -70,7 +72,7 @@ You can also skip controller finish and `return FastRefreshResult.success` (or `
 
 ## Widget constructor vs builder {#widget-vs-builder}
 
-Same split as EasyRefresh: the default constructor injects physics into the subtree; `FastRefresh.builder` hands physics to you.
+The default constructor injects physics into the subtree; `FastRefresh.builder` hands physics to you.
 
 ### Widget constructor {#widget-ctor}
 
@@ -90,19 +92,23 @@ FastRefresh(
 ### builder constructor {#builder-ctor}
 
 ```dart
-FastRefresh.builder(
-  onRefresh: () async {},
-  childBuilder: (context, physics) {
-    return CustomScrollView(
-      physics: physics, // required, or pull-to-refresh never starts
-      slivers: [
-        const SliverAppBar(pinned: true, title: Text('Title')),
-        SliverList(delegate: SliverChildListDelegate.fixed([])),
-      ],
-    );
-  },
+Scaffold(
+  appBar: AppBar(title: const Text('Title')),
+  body: FastRefresh.builder(
+    onRefresh: () async {},
+    childBuilder: (context, physics) {
+      return CustomScrollView(
+        physics: physics, // required, or pull-to-refresh never starts
+        slivers: [
+          SliverList(delegate: SliverChildListDelegate.fixed([])),
+        ],
+      );
+    },
+  ),
 );
 ```
+
+Keep the AppBar outside `FastRefresh` so refresh starts at the list top. Do not put `SliverAppBar` in the default builder snippet; use Nested (`isNested: true`) or Locator for a collapsing bar.
 
 | | Notes |
 | --- | --- |
@@ -110,7 +116,7 @@ FastRefresh.builder(
 | Cons | Forgetting `physics: physics` leaves platform physics; refresh will not run |
 | Use when | `NestedScrollView`, `PageView` + lists, or another scrollable outside the list |
 
-Start with the widget constructor. Switch to builder when an inner list steals the gesture. Pair with `isNested: true` for NestedScrollView. The example app has `refresh_example/widget` and `refresh_example/builder`.
+Start with the widget constructor. Switch to builder when an inner list steals the gesture. Pair with `isNested: true` for NestedScrollView. The example hub has Widget, Builder, Nested, Locator, refreshOnStart, clamping, horizontal, and secondary.
 
 ---
 
@@ -128,11 +134,107 @@ A successful refresh with `resetAfterRefresh` (default `true`) clears footer `no
 
 ## More {#more}
 
-- **`FastRefresh.builder`**: see [Widget constructor vs builder](#widget-vs-builder).
-- **`refreshOnStart`**: trigger refresh after the first frame.
-- **`FastHeaderLocator` / `FastFooterLocator`**: place the indicator inside the list (`position: locator`).
-- **`clamping: true`**: the list does not overscroll; only the indicator moves.
-- **Secondary floor**: `secondaryTriggerOffset` plus `openHeaderSecondary` / `closeHeaderSecondary`.
+- **`FastRefresh.builder`**: see [Widget constructor vs builder](#widget-vs-builder). Example: `refresh_example/builder`.
+- **`refreshOnStart`**: trigger refresh after the first frame. Example: `refresh_example/refresh_on_start`.
+- **`FastHeaderLocator` / `FastFooterLocator`**: place the indicator inside the list (`position: locator`). Example: `refresh_example/locator`.
+- **`clamping: true`**: the list does not overscroll; only the indicator moves. Example: `refresh_example/clamping`.
+- **`isNested: true`**: pin an outer app bar and refresh the inner list. Example: `refresh_example/nested`.
+- **Horizontal**: `ListView` / `PageView` with `scrollDirection: Axis.horizontal`. Example: `refresh_example/horizontal`. See [Horizontal](#horizontal).
+- **Secondary floor**: keep pulling past the refresh trigger to open a second page. Example: `refresh_example/secondary`. See [Secondary floor](#secondary).
+
+---
+
+## Horizontal {#horizontal}
+
+Switch the list to horizontal scroll. Classic Header / Footer move to the leading and trailing edges.
+
+```dart
+FastRefresh(
+  clipBehavior: Clip.none,
+  header: const FastClassicHeader(),
+  footer: const FastClassicFooter(infiniteOffset: null),
+  onRefresh: () async {},
+  onLoad: () async {},
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: items.length,
+    itemBuilder: (_, i) => SizedBox(width: 220, child: Text(items[i])),
+  ),
+);
+```
+
+| Topic | Notes |
+| --- | --- |
+| `scrollDirection` | With `Axis.horizontal`, Header is on the left and Footer on the right (forward lists) |
+| `triggerAxis` | Optional. `Axis.horizontal` responds only on that axis; `null` means no filter |
+| `PageView` | Set footer `infiniteOffset: null`, or paging a page starts `onLoad` |
+| `clipBehavior` | Use `Clip.none` when the indicator paints outside the viewport |
+
+See `refresh_example/horizontal` for a page that toggles `ListView` and `PageView`.
+
+---
+
+## Secondary floor {#secondary}
+
+Pull past the normal refresh trigger to open a near-full-screen second page. The state machine is already in the kernel; compose the page with `FastSecondaryBuilderHeader`.
+
+```
+inactive → drag → armed → …          normal refresh
+                 ↘ secondaryArmed → secondaryReady → secondaryOpen
+                                                      ↓
+                                              secondaryClosing → inactive
+```
+
+| Parameter | Notes |
+| --- | --- |
+| `secondaryTriggerOffset` | Distance that opens the floor; must be greater than `triggerOffset` |
+| `secondaryDimension` | Height when open; defaults to the viewport |
+| `secondaryVelocity` | Snap-open speed after release; default 3000 |
+| `secondaryCloseTriggerOffset` | How far to push back before closing; default 70 |
+
+Do not combine `secondaryTriggerOffset` with `infiniteOffset` (the default Header has no infinite refresh; do not enable it on a secondary Header).
+
+```dart
+FastRefresh(
+  clipBehavior: Clip.none,
+  controller: controller,
+  header: FastSecondaryBuilderHeader(
+    header: const FastClassicHeader(
+      position: FastRefreshIndicatorPosition.locator,
+      clipBehavior: Clip.none,
+      safeArea: false,
+    ),
+    secondaryTriggerOffset: 120,
+    secondaryDimension: screenHeight - kToolbarHeight - topPadding,
+    listenable: listenable,
+    builder: (context, state, header) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SizedBox(height: state.offset, width: double.infinity),
+          // Second-floor page: screen height, opacity follows the gesture
+          header.build(context, state),
+        ],
+      );
+    },
+  ),
+  child: CustomScrollView(
+    slivers: [
+      // Sync SliverAppBar with listenable
+      const FastHeaderLocator.sliver(),
+      // list
+    ],
+  ),
+);
+```
+
+Open / close:
+
+- Gesture: pull past `secondaryTriggerOffset` and release
+- Programmatic: `controller.openHeaderSecondary()` / `closeHeaderSecondary()`
+- Back: while open, `PopScope(canPop: false)` should call `closeHeaderSecondary()`
+
+`FastRefresh.clipBehavior` must be `Clip.none`, or the taller second-floor page is clipped. Full recipe: `refresh_example/secondary`.
 
 ---
 

@@ -9,13 +9,15 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_toast/</code>
 </p>
 
+<DocCredit module="toast" />
+
 ## Overview {#overview}
 
-Global toasts live on the app-root overlay. Call `showToast` / `showCustomToast` **without** a `BuildContext`; they are not tied to the navigator stack. Only one toast is visible at a time; extras wait in a FIFO queue.
+Global toasts live on the app-root overlay. Call `showToast` **without** a `BuildContext`; they are not tied to the navigator stack. Only one toast is visible at a time; extras wait in a FIFO queue.
 
 | Topic | Notes |
 | --- | --- |
-| Show API | `showToast(message)` / `showCustomToast(widget)` |
+| Show API | `showToast(message)`; pass `builder` for custom content |
 | Host | Wrap `MaterialApp.builder` with `FastToastOverlay` |
 | Queue | Single slot, FIFO; pending cap 5, drop-oldest |
 | Theme | `FastToastTheme` (`ThemeExtension`) for the text panel only |
@@ -61,22 +63,25 @@ showToast(
   ),
 );
 
-showCustomToast(
-  Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(Icons.check_circle, color: Colors.green),
-      SizedBox(width: 8),
-      Text('Custom content'),
-    ],
-  ),
+showToast(
+  null,
+  builder: (context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.check_circle, color: Colors.green),
+        SizedBox(width: 8),
+        Text('Custom content'),
+      ],
+    );
+  },
 );
 
 FastToast.dismiss();
 FastToast.dismissAll();
 ```
 
-`showCustomToast` inserts your widget as toast **content**. The host still owns queue, position, duration, and motion, and does **not** wrap default panel chrome. The widget is built under the overlay tree (`Builder` / `Theme.of` work); do not capture a disposed page `BuildContext`.
+`builder` inserts your widget as toast **content**. The host still owns queue, position, duration, and motion, and does **not** wrap default panel chrome. The callback receives the overlay-tree `BuildContext`, so `Theme.of` works; do not capture a disposed page `BuildContext`. When `builder` is set, `message` is ignored.
 
 ---
 
@@ -109,12 +114,14 @@ Resolution order:
 
 ## API {#toast-api}
 
-### `showToast` / `showCustomToast`
+### `showToast`
 
 ```dart
-void showToast(String message, {FastToastConfig? config});
-
-void showCustomToast(Widget toast, {FastToastConfig? config});
+void showToast(
+  String? message, {
+  WidgetBuilder? builder,
+  FastToastConfig? config,
+});
 ```
 
 ### `FastToast`

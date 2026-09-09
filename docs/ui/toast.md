@@ -9,13 +9,15 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_toast/</code>
 </p>
 
+<DocCredit module="toast" />
+
 ## 概览 {#overview}
 
-全局 Toast 挂在 App 根 Overlay 上：调用 `showToast` / `showCustomToast` **无需** `BuildContext`，与当前路由栈解耦。同一时刻只展示一条，其余 FIFO 排队。
+全局 Toast 挂在 App 根 Overlay 上：调用 `showToast` **无需** `BuildContext`，与当前路由栈解耦。同一时刻只展示一条，其余 FIFO 排队。
 
 | 要点 | 说明 |
 | --- | --- |
-| 展示入口 | `showToast(message)` / `showCustomToast(widget)` |
+| 展示入口 | `showToast(message)`；自定义内容传 `builder` |
 | 挂载 | `MaterialApp.builder` 包一层 `FastToastOverlay` |
 | 队列 | 单槽、FIFO；pending 上限 5，满时丢掉最旧 |
 | 主题 | `FastToastTheme`（`ThemeExtension`），只作用于文本面板 |
@@ -61,22 +63,25 @@ showToast(
   ),
 );
 
-showCustomToast(
-  Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(Icons.check_circle, color: Colors.green),
-      SizedBox(width: 8),
-      Text('自定义内容'),
-    ],
-  ),
+showToast(
+  null,
+  builder: (context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.check_circle, color: Colors.green),
+        SizedBox(width: 8),
+        Text('自定义内容'),
+      ],
+    );
+  },
 );
 
 FastToast.dismiss();
 FastToast.dismissAll();
 ```
 
-`showCustomToast` 的 Widget 作为 Toast **内容**插入 Overlay：宿主仍负责队列、位置、时长与动画，**不会**再套默认背景和内边距。内容构建在 Overlay 子树中，可用 `Builder` / `Theme.of`；不要捕获已销毁的页面 `BuildContext`。
+`builder` 返回的 Widget 作为 Toast **内容**插入 Overlay：宿主仍负责队列、位置、时长与动画，**不会**再套默认背景和内边距。回调拿到的是 Overlay 子树的 `BuildContext`，可直接 `Theme.of`；不要捕获已销毁的页面 `BuildContext`。传入 `builder` 时会忽略 `message`。
 
 ---
 
@@ -109,12 +114,14 @@ MaterialApp(
 
 ## API {#toast-api}
 
-### `showToast` / `showCustomToast`
+### `showToast`
 
 ```dart
-void showToast(String message, {FastToastConfig? config});
-
-void showCustomToast(Widget toast, {FastToastConfig? config});
+void showToast(
+  String? message, {
+  WidgetBuilder? builder,
+  FastToastConfig? config,
+});
 ```
 
 ### `FastToast`

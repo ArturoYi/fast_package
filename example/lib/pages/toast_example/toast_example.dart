@@ -1,8 +1,8 @@
 import 'package:fast_package/fast_package.dart';
 import 'package:flutter/material.dart';
 
-/// Demo page for [showToast] and [showCustomToast].
-/// [showToast] 与 [showCustomToast] 演示页。
+/// Demo page for [showToast].
+/// [showToast] 演示页。
 class ToastExample extends StatelessWidget {
   const ToastExample({super.key});
 
@@ -43,27 +43,30 @@ class ToastExample extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: () => showCustomToast(
-              Material(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(24),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.greenAccent),
-                      SizedBox(width: 8),
-                      Text(
-                        '自定义 Toast',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
+            onPressed: () => showToast(
+              null,
+              builder: (BuildContext context) {
+                return Material(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(24),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.greenAccent),
+                        SizedBox(width: 8),
+                        Text(
+                          '自定义 Toast',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-            child: const Text('showCustomToast'),
+            child: const Text('showToast · builder'),
           ),
           const SizedBox(height: 12),
           const ElevatedButton(

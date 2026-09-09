@@ -9,9 +9,11 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_refresh/</code>
 </p>
 
+<DocCredit module="refresh" />
+
 ## 概览 {#overview}
 
-`FastRefresh` 对齐 EasyRefresh 的核心物理与状态机：自定义 `ScrollPhysics` 处理摩擦 / 回弹 / 越界，Header/Footer notifier 驱动
+`FastRefresh` 用自定义 `ScrollPhysics` 处理摩擦 / 回弹 / 越界，Header/Footer notifier 驱动
 
 `inactive → drag → armed → ready → processing → processed → done`，
 
@@ -80,7 +82,7 @@ FastRefresh(
 
 ## Widget 构造 vs builder {#widget-vs-builder}
 
-对齐 EasyRefresh：默认构造把 physics 注入作用域；`FastRefresh.builder` 把 physics 交给你。
+默认构造把 physics 注入作用域；`FastRefresh.builder` 把 physics 交给你。
 
 ### Widget 构造 {#widget-ctor}
 
@@ -100,19 +102,23 @@ FastRefresh(
 ### builder 构造 {#builder-ctor}
 
 ```dart
-FastRefresh.builder(
-  onRefresh: () async {},
-  childBuilder: (context, physics) {
-    return CustomScrollView(
-      physics: physics, // 必须挂上，否则下拉不会刷新
-      slivers: [
-        const SliverAppBar(pinned: true, title: Text('标题')),
-        SliverList(delegate: SliverChildListDelegate.fixed([])),
-      ],
-    );
-  },
+Scaffold(
+  appBar: AppBar(title: const Text('标题')),
+  body: FastRefresh.builder(
+    onRefresh: () async {},
+    childBuilder: (context, physics) {
+      return CustomScrollView(
+        physics: physics, // 必须挂上，否则下拉不会刷新
+        slivers: [
+          SliverList(delegate: SliverChildListDelegate.fixed([])),
+        ],
+      );
+    },
+  ),
 );
 ```
+
+AppBar 放在 `FastRefresh` 外面，刷新从列表顶开始。不要把 `SliverAppBar` 塞进默认 builder；折叠顶栏用 Nested（`isNested: true`）或 Locator。
 
 | | 说明 |
 | --- | --- |
@@ -120,7 +126,7 @@ FastRefresh.builder(
 | 缺点 | 漏写 `physics: physics` 时列表仍是平台默认物理，刷新不会触发 |
 | 适用 | `NestedScrollView`、`PageView` 套列表、外层还有独立滚动 |
 
-拿不准先用 Widget 构造；出现「里层列表把刷新抢走」再换成 builder。可配合 `isNested: true`。example 里 `refresh_example/widget` 与 `refresh_example/builder` 对照。
+拿不准先用 Widget 构造；出现「里层列表把刷新抢走」再换成 builder。可配合 `isNested: true`。example 入口有 Widget、Builder、Nested、Locator、refreshOnStart、clamping、横向、二楼。
 
 ---
 
@@ -150,11 +156,107 @@ Footer 默认 `infiniteOffset = 70`：距底部小于 70 即自动加载，不�
 
 ## 更多能力 {#more}
 
-- **`FastRefresh.builder`**：见 [Widget 构造 vs builder](#widget-vs-builder)。
-- **`refreshOnStart`**：首帧构建完成后自动触发刷新。
-- **`FastHeaderLocator` / `FastFooterLocator`**：把指示器放进列表内部（`position: locator`）。
-- **`clamping: true`**：列表不跟着越界，只有指示器移动（Material 风格）。
-- **二楼**：`secondaryTriggerOffset` + `openHeaderSecondary` / `closeHeaderSecondary`。
+- **`FastRefresh.builder`**：见 [Widget 构造 vs builder](#widget-vs-builder)。example 的 `refresh_example/builder`。
+- **`refreshOnStart`**：首帧构建完成后自动触发刷新。example 的 `refresh_example/refresh_on_start`。
+- **`FastHeaderLocator` / `FastFooterLocator`**：把指示器放进列表内部（`position: locator`）。example 的 `refresh_example/locator`。
+- **`clamping: true`**：列表不跟着越界，只有指示器移动（Material 风格）。example 的 `refresh_example/clamping`。
+- **`isNested: true`**：`NestedScrollView` 外层钉顶栏、内层列表刷新。example 的 `refresh_example/nested`。
+- **横向**：`ListView` / `PageView` 的 `scrollDirection` 为 horizontal。example 的 `refresh_example/horizontal`。见 [横向](#horizontal)。
+- **二楼**：继续下拉打开第二页。example 的 `refresh_example/secondary`。见 [二楼](#secondary)。
+
+---
+
+## 横向 {#horizontal}
+
+把列表改成横滑即可，不必换物理。Classic Header / Footer 会转到左右两侧。
+
+```dart
+FastRefresh(
+  clipBehavior: Clip.none,
+  header: const FastClassicHeader(),
+  footer: const FastClassicFooter(infiniteOffset: null),
+  onRefresh: () async {},
+  onLoad: () async {},
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal,
+    itemCount: items.length,
+    itemBuilder: (_, i) => SizedBox(width: 220, child: Text(items[i])),
+  ),
+);
+```
+
+| 要点 | 说明 |
+| --- | --- |
+| `scrollDirection` | `Axis.horizontal` 时，Header 在左、Footer 在右（正向列表） |
+| `triggerAxis` | 可选。设为 `Axis.horizontal` 时只响应横轴；`null` 表示不限制 |
+| `PageView` | 必须把 Footer 的 `infiniteOffset` 设为 `null`，否则一翻页就 `onLoad` |
+| `clipBehavior` | 指示器画在视口外时用 `Clip.none` |
+
+完整切换见 example 的 `refresh_example/horizontal`（AppBar 可在 `ListView` 与 `PageView` 之间切换）。
+
+---
+
+## 二楼 {#secondary}
+
+拉过普通刷新阈值后继续拉，打开接近全屏的第二页。内核已有状态机，页面用 `FastSecondaryBuilderHeader` 叠内容。
+
+```
+inactive → drag → armed → …          普通刷新
+                 ↘ secondaryArmed → secondaryReady → secondaryOpen
+                                                      ↓
+                                              secondaryClosing → inactive
+```
+
+| 参数 | 说明 |
+| --- | --- |
+| `secondaryTriggerOffset` | 二楼触发距离，必须大于 `triggerOffset` |
+| `secondaryDimension` | 二楼打开后的高度，默认视口高 |
+| `secondaryVelocity` | 松手后吸开二楼的速度，默认 3000 |
+| `secondaryCloseTriggerOffset` | 上推多少后开始关楼，默认 70 |
+
+`secondaryTriggerOffset` 不能和 `infiniteOffset` 同时用（Header 默认没有无限刷新，不要给二楼 Header 开无限）。
+
+```dart
+FastRefresh(
+  clipBehavior: Clip.none,
+  controller: controller,
+  header: FastSecondaryBuilderHeader(
+    header: const FastClassicHeader(
+      position: FastRefreshIndicatorPosition.locator,
+      clipBehavior: Clip.none,
+      safeArea: false,
+    ),
+    secondaryTriggerOffset: 120,
+    secondaryDimension: screenHeight - kToolbarHeight - topPadding,
+    listenable: listenable,
+    builder: (context, state, header) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SizedBox(height: state.offset, width: double.infinity),
+          // 二楼页：高度用屏幕高，透明度跟手势
+          header.build(context, state),
+        ],
+      );
+    },
+  ),
+  child: CustomScrollView(
+    slivers: [
+      // 用 listenable 同步 SliverAppBar
+      const FastHeaderLocator.sliver(),
+      // 列表
+    ],
+  ),
+);
+```
+
+打开 / 关闭：
+
+- 手势：拉过 `secondaryTriggerOffset` 再松手
+- 编程：`controller.openHeaderSecondary()` / `closeHeaderSecondary()`
+- 返回键：二楼打开时用 `PopScope(canPop: false)` 调 `closeHeaderSecondary()`
+
+`FastRefresh.clipBehavior` 必须是 `Clip.none`，否则高出 trigger 的二楼页会被裁掉。完整配方见 example 的 `refresh_example/secondary`。
 
 ---
 

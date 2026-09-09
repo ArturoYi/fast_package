@@ -1,7 +1,7 @@
 import 'fast_toast_position.dart';
 
-/// Per-toast behavior for [showToast] and [showCustomToast].
-/// [showToast] 与 [showCustomToast] 的单条行为配置。
+/// Per-toast behavior for [showToast].
+/// [showToast] 的单条行为配置。
 final class FastToastConfig {
   /// Creates a toast behavior config.
   /// 创建一条 Toast 的行为配置。

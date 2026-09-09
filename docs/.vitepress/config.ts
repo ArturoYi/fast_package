@@ -82,6 +82,7 @@ const sidebarZhGroups = [
       { text: 'Cover 布局', link: '/ui/cover-box' },
       { text: 'Shimmer 骨架屏', link: '/ui/shimmer' },
       { text: 'Toast', link: '/ui/toast' },
+      { text: 'Loading', link: '/ui/loading' },
       { text: 'Refresh 刷新加载', link: '/ui/refresh' },
     ],
   },
@@ -123,6 +124,7 @@ const sidebarEnGroups = [
       { text: 'Cover layout', link: '/en/ui/cover-box' },
       { text: 'Shimmer skeletons', link: '/en/ui/shimmer' },
       { text: 'Toast', link: '/en/ui/toast' },
+      { text: 'Loading', link: '/en/ui/loading' },
       { text: 'Refresh', link: '/en/ui/refresh' },
     ],
   },
@@ -188,7 +190,7 @@ export default defineConfig({
           { icon: 'github', link: 'https://github.com/ArturoYi/fast_package' },
         ],
         footer: {
-          message: '基于 MIT 许可证发布',
+          message: '基于 BSD 3-Clause 许可证发布',
           copyright: 'Copyright © ArturoYi',
         },
       },
@@ -217,7 +219,7 @@ export default defineConfig({
           { icon: 'github', link: 'https://github.com/ArturoYi/fast_package' },
         ],
         footer: {
-          message: 'Released under the MIT License',
+          message: 'Released under the BSD 3-Clause License',
           copyright: 'Copyright © ArturoYi',
         },
       },

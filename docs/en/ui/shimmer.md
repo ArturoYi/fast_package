@@ -9,6 +9,8 @@ outline: [2, 3]
   <code>lib/src/ui_kit/fast_shimmer/</code>
 </p>
 
+<DocCredit module="shimmer" />
+
 ## Overview {#overview}
 
 The `FastShimmer` family provides **hand-crafted loading skeletons** with a synchronized highlight sweep. Compose layouts with `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList`, and let `FastShimmerScope` drive one shared `AnimationController` plus `ShaderMask` so every descendant stays in phase.

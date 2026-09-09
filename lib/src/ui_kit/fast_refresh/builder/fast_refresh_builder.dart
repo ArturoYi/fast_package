@@ -17,19 +17,25 @@ part of '../fast_refresh.dart';
 /// **[FastRefresh.builder]** 不注入作用域，必须在回调里显式挂上：
 ///
 /// ```dart
-/// FastRefresh.builder(
-///   onRefresh: () async {},
-///   childBuilder: (context, physics) {
-///     return CustomScrollView(
-///       physics: physics,
-///       slivers: const [
-///         SliverAppBar(pinned: true, title: Text('标题')),
-///         SliverList(delegate: SliverChildListDelegate.fixed([])),
-///       ],
-///     );
-///   },
+/// Scaffold(
+///   appBar: AppBar(title: const Text('标题')),
+///   body: FastRefresh.builder(
+///     onRefresh: () async {},
+///     childBuilder: (context, physics) {
+///       return CustomScrollView(
+///         physics: physics,
+///         slivers: const [
+///           SliverList(delegate: SliverChildListDelegate.fixed([])),
+///         ],
+///       );
+///     },
+///   ),
 /// );
 /// ```
+///
+/// AppBar 放在 [FastRefresh] 外面，刷新从列表顶开始。
+/// 折叠顶栏用 [FastRefresh.isNested] 或 [FastHeaderLocator]，不要把
+/// [SliverAppBar] 写进默认 builder。
 ///
 /// | | Widget 构造 | builder |
 /// | --- | --- | --- |

@@ -15,8 +15,8 @@ import 'package:flutter/material.dart';
 /// )
 /// ```
 ///
-/// Does **not** wrap [showCustomToast] content.
-/// **不会**包裹 [showCustomToast] 的内容。
+/// Does **not** wrap [showToast] content built by `builder`.
+/// **不会**包裹 `builder` 自定义的 Toast 内容。
 ///
 /// Resolution order:
 /// 1. Optional overrides passed to [resolve]

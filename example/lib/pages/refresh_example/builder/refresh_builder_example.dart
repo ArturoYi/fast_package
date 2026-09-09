@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Builder 构造演示：[FastRefresh.builder] 把 physics 交给调用方。
 ///
 /// [CustomScrollView] 必须写 `physics: physics`，否则下拉不会进入刷新状态机。
-/// 适合带 [SliverAppBar] 的页面，或 [NestedScrollView] 等嵌套滚动。
+/// AppBar 放在 [FastRefresh] 外面，刷新只发生在下方列表区，和 Widget 构造一致。
 class RefreshBuilderExample extends StatefulWidget {
   const RefreshBuilderExample({super.key});
 
@@ -66,6 +66,18 @@ class _RefreshBuilderExampleState extends State<RefreshBuilderExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Refresh · Builder'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'callRefresh',
+            onPressed: () => _controller.callRefresh(
+              scrollController: _scrollController,
+            ),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: FastRefresh.builder(
         controller: _controller,
         scrollController: _scrollController,
@@ -96,25 +108,12 @@ class _RefreshBuilderExampleState extends State<RefreshBuilderExample> {
             controller: _scrollController,
             physics: physics,
             slivers: <Widget>[
-              SliverAppBar(
-                pinned: true,
-                title: const Text('Refresh · Builder'),
-                actions: <Widget>[
-                  IconButton(
-                    tooltip: 'callRefresh',
-                    onPressed: () => _controller.callRefresh(
-                      scrollController: _scrollController,
-                    ),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                ],
-              ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: Text(
                     'physics 已手动挂到 CustomScrollView。'
-                    '漏写则 SliverAppBar 下的列表不会越界，刷新不会触发。',
+                    '漏写则列表不会越界，刷新不会触发。',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),

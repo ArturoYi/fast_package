@@ -54,9 +54,12 @@ void main() {
     });
 
     test('mixes text and custom widget requests in FIFO order', () {
-      const Widget custom = SizedBox(key: Key('custom'));
+      Widget customBuilder(BuildContext context) {
+        return const SizedBox(key: Key('custom'));
+      }
+
       queue.enqueue(const FastToastRequest.text('a'));
-      queue.enqueue(const FastToastRequest.custom(custom));
+      queue.enqueue(FastToastRequest.custom(customBuilder));
       queue.enqueue(const FastToastRequest.text('c'));
 
       final FastToastRequest first = queue.dequeue()!;
@@ -65,7 +68,7 @@ void main() {
 
       final FastToastRequest second = queue.dequeue()!;
       expect(second.isText, isFalse);
-      expect(second.child, same(custom));
+      expect(second.builder, same(customBuilder));
 
       expect(queue.dequeue()?.message, 'c');
     });

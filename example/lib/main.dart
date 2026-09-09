@@ -2,6 +2,8 @@ import 'package:example/routes/routes.dart';
 import 'package:fast_package/fast_package.dart';
 import 'package:flutter/material.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   runApp(const MyApp());
 }
@@ -13,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      navigatorKey: rootNavigatorKey,
       routes: ExampleRoute.routes,
       initialRoute: ExampleRoute.initRoutes,
       theme: ThemeData(
@@ -20,8 +23,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       builder: (context, child) {
-        return FastToastOverlay(
-          child: child ?? const SizedBox.shrink(),
+        return FastLoadingOverlay(
+          navigatorKey: rootNavigatorKey,
+          child: FastToastOverlay(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );

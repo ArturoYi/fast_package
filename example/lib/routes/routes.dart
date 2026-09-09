@@ -4,6 +4,7 @@ import 'package:example/pages/index/example_index.dart';
 import 'package:example/pages/shimmer_example/shimmer_example.dart';
 import 'package:example/pages/refresh_example/refresh_example.dart';
 import 'package:example/pages/toast_example/toast_example.dart';
+import 'package:example/pages/loading_example/loading_example.dart';
 import 'package:flutter/cupertino.dart';
 
 class ExampleRoute {
@@ -25,6 +26,8 @@ class ExampleRoute {
   static String shimmer = '/shimmer';
   //toast
   static String toast = '/toast';
+  //loading
+  static String loading = '/loading';
   //refresh
   static String refresh = '/refresh';
 
@@ -35,6 +38,7 @@ class ExampleRoute {
         border: (context) => const GradientBorderExample(),
         shimmer: (context) => const ShimmerExample(),
         toast: (context) => const ToastExample(),
+        loading: (context) => const LoadingExample(),
         refresh: (context) => const RefreshExample(),
       };
 }

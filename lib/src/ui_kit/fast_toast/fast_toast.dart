@@ -4,31 +4,30 @@ import 'fast_toast_config.dart';
 import 'fast_toast_controller.dart';
 import 'fast_toast_queue.dart';
 
-/// Shows a themed text toast. Does not require a [BuildContext].
-/// 展示主题化文本 Toast，无需 [BuildContext]。
+/// Shows a themed text toast, or custom overlay content when [builder] is set.
+/// 展示主题化文本 Toast；传入 [builder] 时改为自定义内容。
 ///
-/// Mount [FastToastOverlay] from [MaterialApp.builder] first.
-/// 需先在 [MaterialApp.builder] 中挂载 [FastToastOverlay]。
-void showToast(String message, {FastToastConfig? config}) {
-  FastToastController.instance.enqueue(
-    FastToastRequest.text(
-      message,
-      config: config ?? const FastToastConfig(),
-    ),
+/// Does not require a [BuildContext]. Mount [FastToastOverlay] from
+/// [MaterialApp.builder] first.
+/// 无需 [BuildContext]。需先在 [MaterialApp.builder] 中挂载 [FastToastOverlay]。
+///
+/// When [builder] is set, it supplies overlay content and [message] is ignored.
+/// The host still owns queue, position, duration, and motion.
+/// 传入 [builder] 时由回调提供内容，并忽略 [message]；队列、位置、时长与动画仍由宿主管。
+void showToast(
+  String? message, {
+  WidgetBuilder? builder,
+  FastToastConfig? config,
+}) {
+  assert(
+    builder != null || message != null,
+    'showToast requires a message or a builder.',
   );
-}
-
-/// Shows [toast] as overlay content without default panel chrome.
-/// 将 [toast] 作为 Overlay 内容展示，不套默认面板。
-///
-/// Queue, position, duration, and motion are still handled by the host.
-/// 队列、位置、时长与动画仍由宿主管。
-void showCustomToast(Widget toast, {FastToastConfig? config}) {
+  final FastToastConfig resolved = config ?? const FastToastConfig();
   FastToastController.instance.enqueue(
-    FastToastRequest.custom(
-      toast,
-      config: config ?? const FastToastConfig(),
-    ),
+    builder != null
+        ? FastToastRequest.custom(builder, config: resolved)
+        : FastToastRequest.text(message ?? '', config: resolved),
   );
 }
 

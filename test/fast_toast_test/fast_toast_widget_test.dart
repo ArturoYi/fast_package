@@ -52,18 +52,21 @@ void main() {
     expect(find.text('saved'), findsNothing);
   });
 
-  testWidgets('showCustomToast shows caller widget without default panel', (
+  testWidgets('showToast builder shows caller widget without default panel', (
     tester,
   ) async {
     await tester.pumpWidget(buildApp());
     await tester.pump();
 
-    showCustomToast(
-      const ColoredBox(
-        key: Key('custom-toast'),
-        color: Color(0xFF00C853),
-        child: Text('custom-body'),
-      ),
+    showToast(
+      null,
+      builder: (BuildContext context) {
+        return const ColoredBox(
+          key: Key('custom-toast'),
+          color: Color(0xFF00C853),
+          child: Text('custom-body'),
+        );
+      },
     );
     await tester.pump();
 
@@ -129,7 +132,10 @@ void main() {
     FastToast.dismissAll();
     await tester.pump();
 
-    showCustomToast(const Text('plain-custom'));
+    showToast(
+      null,
+      builder: (BuildContext context) => const Text('plain-custom'),
+    );
     await tester.pump();
 
     expect(find.text('plain-custom'), findsOneWidget);

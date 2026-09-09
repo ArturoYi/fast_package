@@ -107,7 +107,7 @@ class _FastToastViewState extends State<FastToastView>
     final config = widget.request.config;
     final Widget body = widget.request.isText
         ? _FastToastTextPanel(message: widget.request.message!)
-        : widget.request.child!;
+        : widget.request.builder!(context);
 
     Widget content = body;
     if (config.dismissible) {

@@ -1,0 +1,178 @@
+export type CreditLocale = 'zh' | 'en'
+
+export interface CreditSource {
+  name: string
+  url: string
+  author: string
+}
+
+export interface LocalizedCredit {
+  source: CreditSource
+  usage: string
+  improvement: string
+}
+
+const labels = {
+  zh: {
+    source: '借鉴来源',
+    usage: '使用场景',
+    improvement: '做出的改善',
+  },
+  en: {
+    source: 'Source',
+    usage: 'Typical use',
+    improvement: 'What we changed',
+  },
+} as const
+
+export const creditLabels = labels
+
+export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
+  debounce: {
+    zh: {
+      source: {
+        name: 'easy_debounce',
+        url: 'https://github.com/magnuswikhog/easy_debounce',
+        author: 'Magnus Wikhog',
+      },
+      usage: '搜索联想、按钮防连点、滚动分页。',
+      improvement: '拆成三个类，改用 named 参数。',
+    },
+    en: {
+      source: {
+        name: 'easy_debounce',
+        url: 'https://github.com/magnuswikhog/easy_debounce',
+        author: 'Magnus Wikhog',
+      },
+      usage: 'Search suggestions, tap-guards, scroll paging.',
+      improvement: 'Split into three classes with named parameters.',
+    },
+  },
+  'async-queue': {
+    zh: {
+      source: {
+        name: 'async_queue',
+        url: 'https://github.com/samderlust/async_queue',
+        author: 'samderlust',
+      },
+      usage: '上传队列、串行 API、离线同步。',
+      improvement: '无参 AsyncJob，并补齐 JobInfo / addJobThrow。',
+    },
+    en: {
+      source: {
+        name: 'async_queue',
+        url: 'https://github.com/samderlust/async_queue',
+        author: 'samderlust',
+      },
+      usage: 'Upload queues, serial APIs, offline sync.',
+      improvement: 'Parameterless AsyncJob, plus JobInfo / addJobThrow.',
+    },
+  },
+  'gradient-border': {
+    zh: {
+      source: {
+        name: 'gradient_borders',
+        url: 'https://pub.dev/packages/gradient_borders',
+        author: 'The Code Brothers',
+      },
+      usage: '卡片、按钮等需要渐变描边的容器。',
+      improvement: '只保留 Box 描边，单文件零依赖。',
+    },
+    en: {
+      source: {
+        name: 'gradient_borders',
+        url: 'https://pub.dev/packages/gradient_borders',
+        author: 'The Code Brothers',
+      },
+      usage: 'Cards and buttons that need a gradient stroke.',
+      improvement: 'Box stroke only; one file, no extra deps.',
+    },
+  },
+  shimmer: {
+    zh: {
+      source: {
+        name: 'shimmer_animation_kit',
+        url: 'https://github.com/Sachu-Alex/shimmer_animation_kit',
+        author: 'Sachu-Alex',
+      },
+      usage: '列表、详情页的加载骨架。',
+      improvement: '不做自动推断，skeleton 必填。',
+    },
+    en: {
+      source: {
+        name: 'shimmer_animation_kit',
+        url: 'https://github.com/Sachu-Alex/shimmer_animation_kit',
+        author: 'Sachu-Alex',
+      },
+      usage: 'List and detail loading skeletons.',
+      improvement: 'No auto-detect; skeleton is required.',
+    },
+  },
+  toast: {
+    zh: {
+      source: {
+        name: 'Overlay Toast 常见方案',
+        url: '',
+        author: '',
+      },
+      usage: '全局轻提示，无需 BuildContext。',
+      improvement: '只留 showToast，自定义走 builder，单 Overlay。',
+    },
+    en: {
+      source: {
+        name: 'Common Overlay Toast approach',
+        url: '',
+        author: '',
+      },
+      usage: 'Global lightweight toasts without BuildContext.',
+      improvement: 'Only showToast; custom content uses builder; one overlay.',
+    },
+  },
+  loading: {
+    zh: {
+      source: {
+        name: 'Overlay Loading 常见方案',
+        url: '',
+        author: '',
+      },
+      usage: '全局加载中，无需 BuildContext。',
+      improvement: '只居中、无队列，遮罩拦截点击。',
+    },
+    en: {
+      source: {
+        name: 'Common Overlay Loading approach',
+        url: '',
+        author: '',
+      },
+      usage: 'Global loading overlay without BuildContext.',
+      improvement: 'Center only, no queue; barrier blocks taps.',
+    },
+  },
+  refresh: {
+    zh: {
+      source: {
+        name: 'EasyRefresh',
+        url: 'https://github.com/xuelongqy/flutter_easy_refresh',
+        author: 'xuelongqy',
+      },
+      usage: '列表下拉刷新、上拉加载。',
+      improvement: '仅依赖 Flutter SDK，默认 Classic。',
+    },
+    en: {
+      source: {
+        name: 'EasyRefresh',
+        url: 'https://github.com/xuelongqy/flutter_easy_refresh',
+        author: 'xuelongqy',
+      },
+      usage: 'Pull-to-refresh and load-more on lists.',
+      improvement: 'Flutter SDK only; Classic by default.',
+    },
+  },
+}
+
+export function getCredit(
+  module: string,
+  locale: CreditLocale,
+): LocalizedCredit | undefined {
+  return credits[module]?.[locale]
+}

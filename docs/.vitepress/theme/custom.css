@@ -111,3 +111,55 @@
 .doc-source a code {
   color: inherit;
 }
+
+/* Compact 4-line credit on inspired component pages */
+.doc-credit {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--vp-c-brand-1);
+  border-radius: 6px;
+  background: var(--vp-c-brand-soft);
+}
+
+.doc-credit dl {
+  margin: 0;
+}
+
+.doc-credit dl > div {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+}
+
+.doc-credit dl > div + div {
+  margin-top: 0.28rem;
+}
+
+.doc-credit dt {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--vp-c-text-2);
+}
+
+.doc-credit dd {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--vp-c-text-1);
+}
+
+.doc-credit__author {
+  color: var(--vp-c-text-2);
+}
+
+.doc-credit a {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.doc-credit a:hover {
+  text-decoration: underline;
+}
