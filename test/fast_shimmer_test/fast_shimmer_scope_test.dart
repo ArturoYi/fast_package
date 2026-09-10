@@ -142,5 +142,34 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(captured, 0.5);
     });
+
+    testWidgets('beam sweep holds at 1.0 during pause then loops',
+        (tester) async {
+      double? captured;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FastShimmerScope(
+            sweep: FastShimmerSweep.beam,
+            duration: const Duration(seconds: 3),
+            pauseDuration: const Duration(milliseconds: 1800),
+            child: Builder(
+              builder: (context) {
+                captured = FastShimmerScope.of(context);
+                return const SizedBox(width: 200, height: 20);
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3, milliseconds: 100));
+      expect(captured, 1.0);
+
+      await tester.pump(const Duration(milliseconds: 1900));
+      expect(captured, isNotNull);
+      expect(captured, lessThan(1.0));
+    });
   });
 }

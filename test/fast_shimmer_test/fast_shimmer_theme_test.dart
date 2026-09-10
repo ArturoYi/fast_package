@@ -43,6 +43,26 @@ void main() {
       expect(diagonal.begin, Alignment.topLeft);
       expect(diagonal.end, Alignment.bottomRight);
     });
+
+    test('travelingBand starts off the left and exits on the right', () {
+      const bounds = Rect.fromLTWH(0, 0, 200, 40);
+      const bandWidth = 0.2;
+
+      final atStart = FastShimmerDirection.leftToRight.travelingBand(
+        bounds,
+        t: 0,
+        bandWidth: bandWidth,
+      );
+      expect(atStart.left, lessThan(0));
+      expect(atStart.width, 40);
+
+      final atEnd = FastShimmerDirection.leftToRight.travelingBand(
+        bounds,
+        t: 1,
+        bandWidth: bandWidth,
+      );
+      expect(atEnd.left, closeTo(200, 0.001));
+    });
   });
 
   group('FastShimmerTheme.resolve', () {

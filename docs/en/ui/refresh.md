@@ -24,7 +24,8 @@ After release the list springs to the trigger offset, then the task runs. The de
 | Entry | `FastRefresh(onRefresh, onLoad, child)` or `FastRefresh.builder` |
 | Controller | `FastRefreshController`: `callRefresh` / `callLoad` / `finish*` / `resetFooter` |
 | Results | `success` / `fail` / `noMore` |
-| Default indicators | `FastClassicHeader` / `FastClassicFooter` |
+| Paging | `FastPagingList` (`fetchPage`) or a `FastPaging` subclass |
+| Default indicators | `FastClassicHeader` / `FastClassicFooter`; optional `FastMaterial*` |
 | Custom | `FastBuilderHeader` / `FastBuilderFooter`, or listener / locator |
 | Physics | bouncing (list moves) and clamping (list stays, indicator moves) |
 
@@ -116,7 +117,7 @@ Keep the AppBar outside `FastRefresh` so refresh starts at the list top. Do not 
 | Cons | Forgetting `physics: physics` leaves platform physics; refresh will not run |
 | Use when | `NestedScrollView`, `PageView` + lists, or another scrollable outside the list |
 
-Start with the widget constructor. Switch to builder when an inner list steals the gesture. Pair with `isNested: true` for NestedScrollView. The example hub has Widget, Builder, Nested, Locator, refreshOnStart, clamping, horizontal, and secondary.
+Start with the widget constructor. Switch to builder when an inner list steals the gesture. Pair with `isNested: true` for NestedScrollView. The example hub has Widget, Builder, Nested, Locator, refreshOnStart, Paging, clamping, horizontal, and secondary.
 
 ---
 
@@ -128,19 +129,120 @@ inactive → drag → armed → ready → processing → processed → done → 
 
 The Classic footer defaults to `infiniteOffset = 70`: load starts when the list is within 70px of the bottom. Set `infiniteOffset: null` for pull-and-release only.
 
-A successful refresh with `resetAfterRefresh` (default `true`) clears footer `noMore`. Refresh and load are mutually exclusive unless `simultaneously` is `true`.
+A **successful** refresh with `resetAfterRefresh` (default `true`) clears footer `noMore`. Fail, thrown errors, and `noMore` do not. When `controlFinishRefresh` is true, reset happens on `finishRefresh(success)` only.
+
+After `FastRefresh` is disposed or its controller is replaced, `callRefresh` / `finishRefresh` on the old controller are no-ops.
+
+Refresh and load are mutually exclusive unless `simultaneously` is `true`.
 
 ---
 
 ## More {#more}
 
+Same order as the example hub:
+
 - **`FastRefresh.builder`**: see [Widget constructor vs builder](#widget-vs-builder). Example: `refresh_example/builder`.
-- **`refreshOnStart`**: trigger refresh after the first frame. Example: `refresh_example/refresh_on_start`.
-- **`FastHeaderLocator` / `FastFooterLocator`**: place the indicator inside the list (`position: locator`). Example: `refresh_example/locator`.
-- **`clamping: true`**: the list does not overscroll; only the indicator moves. Example: `refresh_example/clamping`.
 - **`isNested: true`**: pin an outer app bar and refresh the inner list. Example: `refresh_example/nested`.
+- **`FastHeaderLocator` / `FastFooterLocator`**: place the indicator inside the list (`position: locator`). Example: `refresh_example/locator`.
+- **`refreshOnStart`**: trigger refresh after the first frame. Example: `refresh_example/refresh_on_start`.
+- **`FastPaging` / `FastPagingList`**: page / total / empty state wired to refresh and load. `FastPagingList` only needs `fetchPage` + `itemBuilder`. Example: `refresh_example/paging`. See [Paging](#paging).
+- **`clamping: true`**: the list does not overscroll; only the indicator moves. Example: `refresh_example/clamping`.
+- **`FastMaterialHeader` / `FastMaterialFooter`**: system-style crescent spinner. Example: `refresh_example/material`. See [Material](#material).
+- **`FastRefreshTheme`**: Classic copy and Material colors via `ThemeExtension`. See [Theme](#theme).
 - **Horizontal**: `ListView` / `PageView` with `scrollDirection: Axis.horizontal`. Example: `refresh_example/horizontal`. See [Horizontal](#horizontal).
 - **Secondary floor**: keep pulling past the refresh trigger to open a second page. Example: `refresh_example/secondary`. See [Secondary floor](#secondary).
+
+---
+
+## Paging {#paging}
+
+For everyday lists use `FastPagingList<T>` — no subclass:
+
+```dart
+FastPagingList<String>(
+  refreshOnStart: true,
+  fetchPage: (page) async {
+    final res = await api.list(page);
+    return FastPagingPage(
+      items: res.items,
+      page: res.page,
+      total: res.total,
+    );
+  },
+  itemBuilder: (context, index, item) => ListTile(title: Text(item)),
+)
+```
+
+`isNoMore`: explicit `hasMore` → `total` / `page`+`totalPage` → last successful page has empty `items`. Keep subclassing `FastPaging` for complex data shapes.
+
+`FastPaging<DataType, ItemType>` matches EasyRefresh's companion `EasyPaging`: subclasses keep data and page fields; the base class wires refresh / load, empty state, and `noMore` to `FastRefresh`.
+
+`isNoMore` uses `total` first (`count >= total`), otherwise `page >= totalPage`. If `onLoad` returns no result, the base class emits `noMore` or `success` from that flag. When the first page already contains everything, refresh finishes by locking the footer as `noMore`.
+
+```dart
+class CustomPaging extends FastPaging<List<String>, String> {
+  const CustomPaging({super.key, super.refreshOnStart = true, super.itemBuilder});
+
+  @override
+  FastPagingState<List<String>, String, CustomPaging> createState() =>
+      _CustomPagingState();
+}
+
+class _CustomPagingState
+    extends FastPagingState<List<String>, String, CustomPaging> {
+  @override
+  int get count => data?.length ?? 0;
+
+  @override
+  String getItem(int index) => data![index];
+
+  @override
+  int? page;
+
+  @override
+  int? total;
+
+  @override
+  int? totalPage;
+
+  @override
+  Widget buildItem(BuildContext context, int index, String item) {
+    return buildItemByBuilder(context, index, item);
+  }
+
+  @override
+  Future<FastRefreshResult?> onRefresh() async {
+    final first = await fetchPage(1);
+    setState(() {
+      data = first.items;
+      page = first.page;
+      total = first.total;
+    });
+    return null;
+  }
+
+  @override
+  Future<FastRefreshResult?> onLoad() async {
+    final next = await fetchPage(page! + 1);
+    setState(() {
+      data = <String>[...data!, ...next.items];
+      page = next.page;
+      total = next.total;
+    });
+    return null;
+  }
+}
+```
+
+| Topic | Notes |
+| --- | --- |
+| Default | `useDefaultPhysics: false` uses `FastRefresh.builder` and attaches physics to the inner `CustomScrollView` |
+| Widget constructor | `useDefaultPhysics: true` for a single list with no nested scroll |
+| Empty | `emptyWidgetBuilder` or override `buildEmptyWidget` when `isEmpty` |
+| On start | `refreshOnStart` + `refreshOnStartWidgetBuilder` |
+| Locator | Locator slivers are inserted when Header / Footer `position` is `locator` |
+
+See the example app’s `refresh_example/paging` (45 items, 10 per page, empty-state and widget-constructor toggles).
 
 ---
 
@@ -235,6 +337,51 @@ Open / close:
 - Back: while open, `PopScope(canPop: false)` should call `closeHeaderSecondary()`
 
 `FastRefresh.clipBehavior` must be `Clip.none`, or the taller second-floor page is clipped. Full recipe: `refresh_example/secondary`.
+
+---
+
+## Material {#material}
+
+The default skin is still Classic. For the system crescent spinner, use `FastMaterialHeader` (default `clamping: true`). `FastMaterialFooter` uses `CircularProgressIndicator` and still infinite-loads (`infiniteOffset: 70`, `clamping: false` — clamping cannot combine with infinite load).
+
+```dart
+FastRefresh(
+  header: const FastMaterialHeader(),
+  footer: const FastMaterialFooter(),
+  onRefresh: () async {},
+  onLoad: () async {},
+  child: ListView(),
+);
+```
+
+---
+
+## Theme {#theme}
+
+`FastRefreshTheme` is a `ThemeExtension`. Classic copy / styles and Material colors resolve as widget args → theme → light/dark English defaults. It does not change trigger distance or springs.
+
+```dart
+ThemeData(
+  extensions: [
+    FastRefreshTheme(
+      headerTexts: FastRefreshIndicatorTexts(
+        dragText: 'Pull to refresh',
+        armedText: 'Release ready',
+        readyText: 'Refreshing...',
+        processingText: 'Refreshing...',
+        processedText: 'Succeeded',
+        noMoreText: 'No more',
+        failedText: 'Failed',
+        messageText: 'Last updated at %T',
+      ),
+      footerTexts: FastRefreshIndicatorTexts.footerEnglish,
+      indicatorColor: Colors.blue,
+    ),
+  ],
+)
+```
+
+Without a registered theme, Classic keeps its English defaults (`Pull to refresh`).
 
 ---
 

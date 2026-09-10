@@ -369,15 +369,16 @@ class _FastRefreshState extends State<FastRefresh>
       waitTaskRefresh: _waitLoadResult,
       isNested: widget.isNested,
     );
-    // 控制器被替换时重新绑定。
-    if (widget.controller != null &&
-        oldWidget.controller != widget.controller) {
+    // 控制器被替换时先解绑旧的，再绑定新的。
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._unbind(this);
       widget.controller?._bind(this);
     }
   }
 
   @override
   void dispose() {
+    widget.controller?._unbind(this);
     _headerNotifier.dispose();
     _footerNotifier.dispose();
     _userOffsetNotifier.dispose();
@@ -446,6 +447,9 @@ class _FastRefreshState extends State<FastRefresh>
   }
 
   /// 包装后的刷新任务：处理 [FastRefresh.refreshOnStart] 与 [FastRefresh.resetAfterRefresh]。
+  ///
+  /// 未接管完成时，仅在结果为成功时清 Footer `noMore`。
+  /// 接管完成时由 [_finishRefresh] 在 [FastRefreshController.finishRefresh] 里处理。
   FutureOr Function()? get _onRefresh {
     if (widget.onRefresh == null) {
       return null;
@@ -455,12 +459,29 @@ class _FastRefreshState extends State<FastRefresh>
         _headerNotifier.addListener(_refreshOnStartListener);
       }
       final res = await Future.sync(widget.onRefresh!);
-      // 刷新成功路径由调用方返回结果；这里按开关重置 Footer noMore。
-      if (widget.resetAfterRefresh) {
+      if (_waitRefreshResult &&
+          widget.resetAfterRefresh &&
+          _isRefreshSuccessResult(res)) {
         _footerNotifier._reset();
       }
       return res;
     };
+  }
+
+  /// `null` / 非 [FastRefreshResult] / [FastRefreshResult.success] 视为成功。
+  static bool _isRefreshSuccessResult(Object? result) {
+    if (result is FastRefreshResult) {
+      return result == FastRefreshResult.success;
+    }
+    return true;
+  }
+
+  /// 结束刷新。成功且 [FastRefresh.resetAfterRefresh] 时清 Footer `noMore`。
+  void _finishRefresh(FastRefreshResult result) {
+    _headerNotifier._finishTask(result);
+    if (widget.resetAfterRefresh && result == FastRefreshResult.success) {
+      _footerNotifier._reset();
+    }
   }
 
   /// 编程触发刷新。

@@ -11,6 +11,13 @@ import 'fast_shimmer_scope.dart';
 /// 这是加载占位的主入口组件。它**只**支持手写骨架——**不会**根据 [child]
 /// 组件树自动推断形状。
 ///
+/// For a thin beam on **real** text or icons, use [FastShimmerHighlight].
+/// For a draggable slide-to-unlock bar, use [FastShimmerSlideUnlock]
+/// (`area` or `label` highlight, same 3 s / 1.8 s beam).
+/// 若要给**真实**文字或图标做细光束扫光，请用 [FastShimmerHighlight]。
+/// 可拖动的滑动解锁请用 [FastShimmerSlideUnlock]
+/// （`area` / `label` 两种贴法，同一套 3 秒 / 1.8 秒光束）。
+///
 /// While [isLoading] is `true`, [skeleton] is shown inside a [FastShimmerScope]
 /// (auto-wrapped when no ancestor scope exists) with loading semantics.
 /// 当 [isLoading] 为 `true` 时，展示 [skeleton]，并在无祖先 Scope 时自动包一层

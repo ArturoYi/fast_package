@@ -4,8 +4,11 @@ import '../fast_shimmer_direction.dart';
 import '../fast_shimmer_scope.dart';
 import '../fast_shimmer_theme.dart';
 
-/// An animated shimmer text placeholder — stacked bars that mimic a paragraph.
-/// 文字行 shimmer 占位——用堆叠横条模拟段落。
+/// An animated shimmer **paragraph skeleton** — stacked bars, not real glyphs.
+/// 文字行 shimmer **骨架**——堆叠横条，不是真实字形。
+///
+/// For a highlight sweep on real text, use [FastShimmerHighlight].
+/// 若要给真实文字做扫光，请用 [FastShimmerHighlight]。
 ///
 /// **Inside a [FastShimmerScope]** (recommended): renders solid white bars
 /// tinted by the parent [ShaderMask].

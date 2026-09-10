@@ -95,8 +95,8 @@ export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
         url: 'https://github.com/Sachu-Alex/shimmer_animation_kit',
         author: 'Sachu-Alex',
       },
-      usage: '列表、详情页的加载骨架。',
-      improvement: '不做自动推断，skeleton 必填。',
+      usage: '列表骨架，以及扫光文字、滑动解锁提示。',
+      improvement: '不做自动推断，skeleton 必填；装饰扫光另走 Highlight。',
     },
     en: {
       source: {
@@ -104,8 +104,8 @@ export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
         url: 'https://github.com/Sachu-Alex/shimmer_animation_kit',
         author: 'Sachu-Alex',
       },
-      usage: 'List and detail loading skeletons.',
-      improvement: 'No auto-detect; skeleton is required.',
+      usage: 'List skeletons, plus highlight text and slide-to-unlock hints.',
+      improvement: 'No auto-detect; skeleton is required. Decorative sweep uses Highlight.',
     },
   },
   toast: {
@@ -156,7 +156,7 @@ export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
         author: 'xuelongqy',
       },
       usage: '列表下拉刷新、上拉加载。',
-      improvement: '仅依赖 Flutter SDK，默认 Classic。',
+      improvement: '仅依赖 Flutter SDK，默认 Classic。可选 Material 指示器；日常分页用 FastPagingList 传入 fetchPage 即可，不必继承 FastPaging。',
     },
     en: {
       source: {
@@ -165,7 +165,7 @@ export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
         author: 'xuelongqy',
       },
       usage: 'Pull-to-refresh and load-more on lists.',
-      improvement: 'Flutter SDK only; Classic by default.',
+      improvement: 'Flutter SDK only; Classic remains the default. Optional Material indicators; FastPagingList takes fetchPage, so everyday paging needs no FastPaging subclass.',
     },
   },
 }

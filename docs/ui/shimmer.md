@@ -1,5 +1,5 @@
 ---
-title: Shimmer 骨架屏
+title: Shimmer 扫光
 outline: [2, 3]
 ---
 
@@ -13,18 +13,19 @@ outline: [2, 3]
 
 ## 概览 {#overview}
 
-`FastShimmer` 系列提供**手写骨架屏**与同步扫光动画：用 `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList` 拼布局，由 `FastShimmerScope` 用单个 `AnimationController` + `ShaderMask` 驱动整棵子树同相位扫光。
+`FastShimmer` 系列提供**手写骨架屏**与**装饰性扫光**：用 `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList` 拼加载骨架；用 `FastShimmerHighlight` 给真实文字 / 图标 / 滑块打上一道细白光束。扫光由 `FastShimmerScope` 用单个 `AnimationController` + `ShaderMask` 驱动，同一 Scope 下子树同相位。
 
 | 要点 | 说明 |
 | --- | --- |
-| 主入口 | `FastShimmer(isLoading, skeleton, child)` |
-| 同步动画 | `FastShimmerScope`（无祖先 Scope 时由 `FastShimmer` 自动包裹） |
-| 占位积木 | `Box` / `Circle` / `Text` / `List` |
+| 加载入口 | `FastShimmer(isLoading, skeleton, child)` |
+| 同步动画 | `FastShimmerScope`（无祖先 Scope 时由 `FastShimmer` / `FastShimmerHighlight` 自动包裹） |
+| 占位积木 | `Box` / `Circle` / `Text`（骨架横条） / `List` |
+| 装饰扫光 | `FastShimmerHighlight`（细光束） / `FastShimmerSlideUnlock`（可拖动；`area` 整条区域 / `label` 仅文字） |
 | 主题 | `FastShimmerTheme`（`ThemeExtension`）+ `FastShimmerDirection` |
-| **不做** | 从 `child` 自动推断骨架形状 |
+| **不做** | 从 `child` 自动推断骨架形状；拖动时不把字色变浅 |
 
 ::: tip
-骨架子节点需**不透明**（包内占位默认白底），`ShaderMask` 的渐变才能可见。完整演示见 example 的 `ShimmerExample` 页。
+被扫光的像素必须**不透明**（骨架占位默认白底；真实文字用实心字形色，便捷构造会写成白色）。`ShaderMask` 的可见颜色来自主题，不是子节点自己的 `color`。完整演示见 example 的 `ShimmerExample` 入口（骨架屏 / 扫光文字 / 滑动解锁）。
 :::
 
 ---
@@ -69,6 +70,48 @@ FastShimmerScope(
       FastShimmerText(lines: 2, width: 160),
     ],
   ),
+);
+```
+
+---
+
+## 装饰性扫光 {#shimmer-highlight}
+
+`FastShimmerText` 是**骨架横条**。要让真实文字发亮，用 `FastShimmerHighlight` 包一层不透明的 `Text` / `Icon`：
+
+```dart
+FastShimmerHighlight.text(
+  '滑动解锁',
+  style: const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    color: Color(0x66FFFFFF), // 未传 baseColor 时当作扫光底色
+  ),
+  highlightColor: Colors.white,
+);
+```
+
+默认动效是一道细白高光带：约 **3 秒**从左扫到右，扫完**停顿约 1.8 秒**再循环。字色保持不变，不会随动画变浅。`ShaderMask` 只给 child 的不透明像素着色，轨道 / 卡片背景放在 Scope 外面就不会动。
+
+任意不透明子节点都可以：
+
+```dart
+FastShimmerHighlight(
+  baseColor: const Color(0xFF9E9E9E),
+  highlightColor: Colors.white,
+  child: const Icon(Icons.chevron_right, color: Colors.white),
+);
+```
+
+可拖动的滑动解锁：斜向柔光约 **3 秒**从左扫到右，扫完停顿约 **1.8 秒**再循环。两种贴法共用这套参数——`area` 扫整条金属胶囊（文案居中叠在上面），`label` 只扫居中的提示字形（轨道和滑钮不动）。页面 / 卡片背景放在控件外面就不会动；拖动时字色不变浅；`resetOnUnlock` 控制解锁后是否复位：
+
+```dart
+FastShimmerSlideUnlock(
+  label: '滑动解锁',
+  highlight: FastShimmerSlideUnlockHighlight.area, // 或 .label
+  successLabel: '已解锁',
+  resetOnUnlock: true,
+  onUnlocked: _unlock,
 );
 ```
 
@@ -132,13 +175,21 @@ const FastShimmer({
 const FastShimmerScope({
   required Widget child,
   Duration duration = const Duration(milliseconds: 1500),
+  Duration pauseDuration = Duration.zero,
+  FastShimmerSweep sweep = FastShimmerSweep.wash,
+  double bandWidth = 0.18,
+  double sheenRotation = FastShimmerScope.beamSheenRotation,
 });
 ```
 
 | 参数 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | `child` | `Widget` | 是 | 接收扫光遮罩的骨架子树 |
-| `duration` | `Duration` | 否 | 一次完整扫光循环时长，默认 1500 ms |
+| `duration` | `Duration` | 否 | **扫过**时长（不含停顿），骨架默认 1500 ms |
+| `pauseDuration` | `Duration` | 否 | 扫完后的停顿，默认 `0`（骨架连续扫） |
+| `sweep` | `FastShimmerSweep` | 否 | `wash` 宽幅洗刷（骨架）；`beam` 斜向柔光（装饰） |
+| `bandWidth` | `double` | 否 | 高光带相对扫光轴的宽度比例，仅 `beam` 使用；越大越软 |
+| `sheenRotation` | `double` | 否 | `beam` 的倾斜角（弧度），默认约 -0.45；文字扫光可用 `0` 水平扫 |
 
 静态方法：
 
@@ -261,6 +312,89 @@ const FastShimmerText({
 | `width` | 非末行完整宽度 |
 | `lastLineWidthFraction` | 末行相对 `width` 的比例，范围 `(0, 1]` |
 
+这是段落**骨架**，不是真实文字扫光。真实字形请用 `FastShimmerHighlight`。
+
+---
+
+#### `FastShimmerHighlight` {#fast-shimmer-highlight}
+
+```dart
+const FastShimmerHighlight({
+  required Widget child,
+  Duration? duration,
+  Duration? pauseDuration,
+  double? bandWidth,
+  Color? baseColor,
+  Color? highlightColor,
+  FastShimmerDirection? direction,
+});
+
+factory FastShimmerHighlight.text(
+  String data, {
+  TextStyle? style,
+  TextAlign? textAlign,
+  int? maxLines,
+  TextOverflow? overflow,
+  Duration? duration,
+  Duration? pauseDuration,
+  double? bandWidth,
+  Color? baseColor,
+  Color? highlightColor,
+  FastShimmerDirection? direction,
+});
+```
+
+| 参数 | 说明 |
+| --- | --- |
+| `child` | 接收扫光的不透明内容（通常是实心 `Text` / `Icon` / 滑块） |
+| `duration` | 扫过时长，默认 **3 s**；已有祖先 Scope 时忽略 |
+| `pauseDuration` | 扫完停顿，默认 **1.8 s** |
+| `bandWidth` | 细光束宽度比例，默认 `0.18` |
+| `baseColor` / `highlightColor` / `direction` | 仅在本组件自己创建 Scope 时覆盖主题 |
+
+`text` 便捷构造会把字形色改成不透明白，以便 `ShaderMask` 着色。未传 `baseColor` 时，会把 `style.color` 当作扫光底色。已有祖先 `FastShimmerScope` 时**不再**包第二层，颜色 / 时序覆盖也不生效。自动创建的 Scope 使用 `FastShimmerSweep.beam`。
+
+---
+
+#### `FastShimmerSlideUnlock` {#fast-shimmer-slide-unlock}
+
+```dart
+const FastShimmerSlideUnlock({
+  String label = '滑动解锁',
+  String? successLabel,
+  VoidCallback? onUnlocked,
+  double height = 60,
+  double thumbSize = 52,
+  double threshold = 0.85,
+  bool enabled = true,
+  bool resetOnUnlock = true,
+  FastShimmerSlideUnlockHighlight highlight =
+      FastShimmerSlideUnlockHighlight.label,
+  Color? trackColor,
+  Color thumbColor = Colors.white,
+  IconData? thumbIcon,
+  IconData? successIcon,
+  TextStyle? labelStyle,
+  Color? baseColor,
+  Color? highlightColor,
+  Duration? duration,
+  Duration? pauseDuration,
+});
+```
+
+| 参数 | 说明 |
+| --- | --- |
+| `label` | 提示文案（拖动时不变浅） |
+| `successLabel` | 解锁成功后的文案；可空 |
+| `onUnlocked` | 越过 `threshold` 并就位到终点时回调一次 |
+| `threshold` | 解锁所需进度，范围 `(0, 1]`，默认 `0.85` |
+| `enabled` | 为 `false` 时不可拖动 |
+| `resetOnUnlock` | 回调后是否把滑块复位（默认 `true`） |
+| `highlight` | `area` 整条胶囊扫光；`label` 仅文字（默认） |
+| `duration` / `pauseDuration` | 细光束扫过 / 停顿，默认 3 s / 1.8 s；两种贴法共用 |
+
+光束沿滑块宽度行进。`area` 把不透明胶囊放进遮罩（金属高光），文案和滑钮叠在上面；`label` 只有字形不透明，轨道和滑钮在遮罩外。RTL 下从右侧滑向左侧。
+
 ---
 
 #### `FastShimmerList` {#fast-shimmer-list}
@@ -335,11 +469,44 @@ Theme(
 
 无 Scope 时，占位仍可见（主题底色），只是没有扫光动画——适合调试布局或暂不需要动效的场景。
 
+### 扫光文字 {#shimmer-text-recipe}
+
+```dart
+FastShimmerHighlight.text(
+  'FAST PACKAGE',
+  style: const TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    color: Color(0xFFC9A227),
+  ),
+  highlightColor: const Color(0xFFFFF4C2),
+);
+```
+
+### 滑动解锁 {#shimmer-slide-unlock-recipe}
+
+```dart
+FastShimmerSlideUnlock(
+  label: '滑动解锁',
+  highlight: FastShimmerSlideUnlockHighlight.area,
+  successLabel: '已解锁',
+  resetOnUnlock: true,
+  onUnlocked: () {
+    // 解锁后的业务
+  },
+);
+```
+
+完整对照见 example 的 `shimmer_example/slide_hint`。
+
 ---
 
 ## 注意点 {#shimmer-notes}
 
 - **手写骨架**：必须显式提供 `skeleton`；本能力不包含 auto-detect / shape detector。
-- **一个 Scope**：建议每个页面或加载子树一个 Scope；嵌套允许但通常多余。
+- **两种文字**：`FastShimmerText` = 骨架横条；`FastShimmerHighlight` = 真实字形上的细光束。
+- **wash vs beam**：骨架默认 `wash` 宽幅连续扫；装饰默认 `beam`（斜向柔光，3 s 扫过 + 1.8 s 停顿）。
+- **一个 Scope**：建议每个页面或加载子树一个 Scope；嵌套允许但通常多余。`FastShimmerHighlight` 放在加载 Scope 里面时会复用祖先扫光，局部颜色 / 时序覆盖无效。
+- **不透明像素**：`BlendMode.srcIn` 把子节点当遮罩，可见色来自扫光渐变。背景放在 Scope 外就不会动。文字扫光请用**不透明**底色（半透明白叠在白字形上会抵消高光）。字色不会随动画变浅。
 - **无障碍**：尊重 `MediaQuery.disableAnimations`；加载态由 `FastShimmer` 宣告 `Loading`。
 - **性能**：扫光在 Scope 层完成，占位组件不会因动画帧重建；列表行数按需控制即可。

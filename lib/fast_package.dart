@@ -30,7 +30,9 @@ export 'src/ui_kit/fast_shimmer/fast_shimmer_scope.dart';
 export 'src/ui_kit/fast_shimmer/fast_shimmer_theme.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_box.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_circle.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_highlight.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_list.dart';
+export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_slide_unlock.dart';
 export 'src/ui_kit/fast_shimmer/widgets/fast_shimmer_text.dart';
 
 // toast（showToast；可选 builder；无 type）

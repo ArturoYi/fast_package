@@ -24,6 +24,13 @@ class FastRefreshController {
     _state = state;
   }
 
+  /// 若当前仍绑定 [state]，则解开。由 [_FastRefreshState] 在 dispose / 更换时调用。
+  void _unbind(_FastRefreshState state) {
+    if (_state == state) {
+      _state = null;
+    }
+  }
+
   /// 编程触发刷新：先越过触发位，再由弹簧吸回并进入 `processing`。
   ///
   /// [overOffset] 超出触发距离的额外偏移，必须大于 0。
@@ -181,7 +188,7 @@ class FastRefreshController {
       [FastRefreshResult result = FastRefreshResult.success, bool force = false]) {
     assert(controlFinishRefresh || force,
         'Please set controlFinishRefresh to true, then use. If you want to modify the result, you can set force to true.');
-    _state?._headerNotifier._finishTask(result);
+    _state?._finishRefresh(result);
   }
 
   /// 结束加载并写入结果。

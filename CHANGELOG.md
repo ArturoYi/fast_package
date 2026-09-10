@@ -25,17 +25,19 @@
 
 ## 0.0.5
 
-* Added global Overlay Toast: `showToast` (optional `builder` for custom content)
-
-## 0.0.7
-
-* Added global Overlay Loading: `showLoading` (center only, barrier, no queue; optional `builder` for custom content)
-* `showToast` / `showLoading` use a single entry; custom content goes through `builder` (removed `showCustomToast` / `showCustomLoading`)
-
-## 0.0.6
-
-* Added `FastRefresh`: EasyRefresh-aligned pull-to-refresh and load-more (custom physics, full indicator state machine, Classic header/footer, controller, `noMore`, builder / locator / refreshOnStart)
+* Overlay: `showToast` / `showLoading` (center, barrier, no queue); single entry, custom content via `builder` (removed `showCustomToast` / `showCustomLoading`)
+* Added `FastRefresh`: EasyRefresh-aligned pull-to-refresh and load-more (custom physics, full indicator state machine, Classic header/footer, controller, `noMore`, builder / locator / `refreshOnStart`)
 * Documented Widget constructor vs `FastRefresh.builder`; default builder keeps AppBar outside `FastRefresh`
-* Example hub adds Nested, Locator, refreshOnStart, clamping, horizontal ListView/PageView, and Header secondary-floor pages
-* Tests cover NestedScrollView + `isNested`, locator slivers, `refreshOnStart`, footer completion sync, horizontal scroll, and Header secondary open/close
-* Documented horizontal axis (`triggerAxis`, PageView must disable footer infinite load) and the secondary-floor recipe
+* `FastRefresh` unbinds its controller on dispose / replacement; later `callRefresh` / `finishRefresh` are no-ops
+* `resetAfterRefresh` clears footer `noMore` only after a successful refresh (`finishRefresh(success)` when completion is controlled)
+* Added `FastRefreshTheme` (`ThemeExtension`) for Classic copy and Material colors
+* Added `FastMaterialHeader` / `FastMaterialFooter` (SDK progress indicators; default skin stays Classic)
+* Added `FastPaging`: EasyPaging-aligned pagination on top of FastRefresh (`page` / `total` / empty / `noMore`)
+* Added `FastPagingList<T>` + `FastPagingPage<T>`: `fetchPage` + `itemBuilder` without subclassing `FastPaging`
+* Added `FastShimmerHighlight`: thin beam on real text / icons / any opaque child (`ShaderMask`, not skeleton bars)
+* `FastShimmerScope` gains `sweep` (`wash` / `beam`), `pauseDuration`, and `bandWidth`
+* Highlight defaults: 3 s left-to-right beam, 1.8 s pause, highlight only on opaque glyphs (background stays still)
+* Added `FastShimmerSlideUnlock`: draggable slider; `highlight` is `area` (slanted soft sheen on the metal capsule) or `label` (centered text only); both use the same 3 s sweep + 1.8 s pause; `resetOnUnlock`; label does not fade while dragging
+* Example hub adds Nested, Locator, refreshOnStart, clamping, horizontal ListView/PageView, Header secondary-floor, Paging (`FastPagingList`), Material, Highlight, and Slide unlock pages
+* Tests cover NestedScrollView + `isNested`, locator slivers, `refreshOnStart`, footer completion, horizontal scroll, Header secondary, controller unbind, success-only reset, theme, Material, FastPaging / FastPagingList, highlight beam timing, and unlock reset
+* Documented horizontal axis (`triggerAxis`, PageView must disable footer infinite load), secondary-floor, FastPaging, and decorative shimmer recipes in Chinese and English

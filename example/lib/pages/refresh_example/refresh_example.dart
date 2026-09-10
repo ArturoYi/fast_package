@@ -2,13 +2,15 @@ import 'package:example/pages/refresh_example/builder/refresh_builder_example.da
 import 'package:example/pages/refresh_example/clamping/refresh_clamping_example.dart';
 import 'package:example/pages/refresh_example/horizontal/refresh_horizontal_example.dart';
 import 'package:example/pages/refresh_example/locator/refresh_locator_example.dart';
+import 'package:example/pages/refresh_example/material/refresh_material_example.dart';
 import 'package:example/pages/refresh_example/nested/refresh_nested_example.dart';
+import 'package:example/pages/refresh_example/paging/refresh_paging_example.dart';
 import 'package:example/pages/refresh_example/refresh_on_start/refresh_on_start_example.dart';
 import 'package:example/pages/refresh_example/secondary/refresh_secondary_example.dart';
 import 'package:example/pages/refresh_example/widget/refresh_widget_example.dart';
 import 'package:flutter/material.dart';
 
-/// Refresh 演示入口：八页场景对照。
+/// Refresh 演示入口：场景对照。
 class RefreshExample extends StatelessWidget {
   const RefreshExample({super.key});
 
@@ -50,9 +52,21 @@ class RefreshExample extends StatelessWidget {
           ),
           _tile(
             context,
+            title: 'Paging',
+            subtitle: 'FastPaging 子类，或 FastPagingList（fetchPage 不用继承）',
+            page: const RefreshPagingExample(),
+          ),
+          _tile(
+            context,
             title: 'clamping',
             subtitle: '列表不越界，只有指示器移动',
             page: const RefreshClampingExample(),
+          ),
+          _tile(
+            context,
+            title: 'Material',
+            subtitle: '系统月牙转圈；Footer 仍可触底加载',
+            page: const RefreshMaterialExample(),
           ),
           _tile(
             context,

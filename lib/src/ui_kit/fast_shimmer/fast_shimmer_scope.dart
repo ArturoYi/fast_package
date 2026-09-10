@@ -2,6 +2,18 @@ import 'package:flutter/material.dart';
 
 import 'fast_shimmer_theme.dart';
 
+/// How the highlight travels across a [FastShimmerScope].
+/// [FastShimmerScope] 高光扫过子树的方式。
+enum FastShimmerSweep {
+  /// Wide three-stop wash used by loading skeletons.
+  /// 加载骨架用的宽幅三段渐变。
+  wash,
+
+  /// Soft slanted sheen, like a light beam on metal.
+  /// 斜向柔边高光，类似光束扫过金属表面。
+  beam,
+}
+
 /// Provides a single shared [AnimationController] to all descendant shimmer
 /// placeholders and applies an animated gradient via [ShaderMask].
 /// 为所有后代 shimmer 占位提供**同一个**共享 [AnimationController]，
@@ -9,10 +21,11 @@ import 'fast_shimmer_theme.dart';
 ///
 /// Place [FastShimmerScope] around an explicit skeleton built from
 /// [FastShimmerBox], [FastShimmerCircle], [FastShimmerText], [FastShimmerList],
-/// or any opaque (typically white) containers:
+/// or any opaque child — including [Text] / [Icon] (solid color) for
+/// decorative highlight effects such as [FastShimmerHighlight]:
 /// 用 [FastShimmerScope] 包裹由 [FastShimmerBox]、[FastShimmerCircle]、
-/// [FastShimmerText]、[FastShimmerList] 或任意不透明（通常为白色）容器
-/// 组成的显式骨架：
+/// [FastShimmerText]、[FastShimmerList] 拼成的骨架，或任意不透明子节点
+/// （含实心 [Text] / [Icon]，见 [FastShimmerHighlight]）：
 ///
 /// ```dart
 /// FastShimmerScope(
@@ -49,23 +62,57 @@ class FastShimmerScope extends StatefulWidget {
   /// [child] is the skeleton subtree that should shimmer.
   /// [child] 是需要呈现 shimmer 效果的骨架子树。
   ///
-  /// [duration] is the length of one full highlight cycle. Defaults to
-  /// 1500 ms. Prefer matching [FastShimmerTheme.duration] for app-wide feel.
-  /// [duration] 为一次完整扫光循环的时长，默认 1500 ms。
-  /// 若希望与全局主题一致，可对齐 [FastShimmerTheme.duration]。
+  /// [duration] is the length of the **sweep** (left → right, etc.).
+  /// Defaults to 1500 ms. After the sweep, [pauseDuration] holds before
+  /// the next loop. Prefer matching [FastShimmerTheme.duration] for
+  /// skeleton feel.
+  /// [duration] 是**扫过**的时长（左 → 右等），默认 1500 ms。
+  /// 扫完后按 [pauseDuration] 停顿再循环。骨架手感可对齐
+  /// [FastShimmerTheme.duration]。
   const FastShimmerScope({
     super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 1500),
+    this.pauseDuration = Duration.zero,
+    this.sweep = FastShimmerSweep.wash,
+    this.bandWidth = 0.18,
+    this.sheenRotation = beamSheenRotation,
   });
 
   /// The skeleton subtree that receives the shimmer [ShaderMask].
   /// 接收 shimmer [ShaderMask] 的骨架子树。
   final Widget child;
 
-  /// Duration of one complete shimmer cycle.
-  /// 一次完整 shimmer 循环的时长。
+  /// Duration of the highlight sweep, not including [pauseDuration].
+  /// 高光扫过的时长，不含 [pauseDuration]。
   final Duration duration;
+
+  /// Hold after the sweep finishes, before the next loop.
+  /// 扫完后、下一轮开始前的停顿。
+  ///
+  /// Defaults to [Duration.zero] so loading skeletons stay a continuous wash.
+  /// 默认 [Duration.zero]，加载骨架保持连续扫光。
+  final Duration pauseDuration;
+
+  /// Wash (skeletons) vs thin traveling beam (decorative highlight).
+  /// 骨架用的宽幅洗刷，或装饰扫光用的细光束。
+  final FastShimmerSweep sweep;
+
+  /// Beam width as a fraction of the sweep-axis length. Used by
+  /// [FastShimmerSweep.beam] only. Wider values look softer.
+  /// 高光带相对扫光轴长度的比例，仅 [FastShimmerSweep.beam] 使用。
+  /// 越大羽化越软。
+  final double bandWidth;
+
+  /// Slight tilt so a beam reads as metal sheen, not a hard vertical wipe.
+  /// 略微倾斜，让光束像金属高光而不是硬直条。
+  static const double beamSheenRotation = -0.45;
+
+  /// Radians applied to a [FastShimmerSweep.beam] gradient. `0` is a
+  /// straight left-to-right swipe (better on short text).
+  /// [FastShimmerSweep.beam] 渐变的倾斜角（弧度）。`0` 为水平扫过
+  /// （短文字上更清楚）。
+  final double sheenRotation;
 
   /// Returns the current animation value (`0.0`–`1.0`) from the nearest
   /// [FastShimmerScope], or `0.5` when no scope is present.
@@ -122,8 +169,16 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
     // didChangeDependencies once MediaQuery is available.
     // 立即开始循环；减少动画的处理在 MediaQuery 可用后的
     // didChangeDependencies 中进行。
-    _controller = AnimationController(vsync: this, duration: widget.duration)
+    _controller = AnimationController(vsync: this, duration: _cycleDuration)
       ..repeat();
+  }
+
+  /// Sweep + pause. Controller `0`–`1` maps across this whole period.
+  /// 扫过 + 停顿。控制器的 `0`–`1` 对应这整段周期。
+  Duration get _cycleDuration {
+    final int total = widget.duration.inMicroseconds +
+        widget.pauseDuration.inMicroseconds;
+    return Duration(microseconds: total > 0 ? total : 1);
   }
 
   @override
@@ -135,8 +190,9 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
   @override
   void didUpdateWidget(FastShimmerScope oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.duration != widget.duration) {
-      _controller.duration = widget.duration;
+    if (oldWidget.duration != widget.duration ||
+        oldWidget.pauseDuration != widget.pauseDuration) {
+      _controller.duration = _cycleDuration;
     }
   }
 
@@ -154,10 +210,36 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
     if (disableAnimations) {
       _controller
         ..stop()
-        ..value = 0.5;
+        ..value = _controllerValueForSweep(0.5);
     } else if (!_controller.isAnimating) {
       _controller.repeat();
     }
+  }
+
+  /// Maps a sweep progress (`0`–`1`) onto the controller, accounting for pause.
+  /// 把扫光进度（`0`–`1`）映射到控制器，并计入停顿段。
+  double _controllerValueForSweep(double sweepT) {
+    final int sweep = widget.duration.inMicroseconds;
+    final int pause = widget.pauseDuration.inMicroseconds;
+    if (pause <= 0 || sweep <= 0) {
+      return sweepT;
+    }
+    return sweepT * sweep / (sweep + pause);
+  }
+
+  /// Beam / wash position (`0`–`1`). Stays at `1` during [pauseDuration].
+  /// 光束 / 洗刷位置（`0`–`1`）。在 [pauseDuration] 期间停在 `1`。
+  double _sweepProgress(double controllerValue) {
+    final int sweep = widget.duration.inMicroseconds;
+    final int pause = widget.pauseDuration.inMicroseconds;
+    if (pause <= 0 || sweep <= 0) {
+      return controllerValue;
+    }
+    final double sweepEnd = sweep / (sweep + pause);
+    if (controllerValue >= sweepEnd) {
+      return 1.0;
+    }
+    return controllerValue / sweepEnd;
   }
 
   @override
@@ -172,37 +254,88 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
       // 缓存骨架树，避免动画帧触发子树重建。
       child: widget.child,
       builder: (BuildContext context, Widget? child) {
-        final double value = _controller.value;
+        final double value = _sweepProgress(_controller.value);
 
-        // Three-stop gradient: base → highlight → base, shifted by [value].
-        // 三段渐变：底色 → 高光 → 底色，随 [value] 平移。
-        final LinearGradient gradient = theme.direction.toGradient(
-          colors: <Color>[
-            theme.baseColor,
-            theme.highlightColor,
-            theme.baseColor,
-          ],
-          stops: <double>[
-            (value - 0.3).clamp(0.0, 1.0),
-            value.clamp(0.0, 1.0),
-            (value + 0.3).clamp(0.0, 1.0),
-          ],
-        );
+        final LinearGradient gradient = widget.sweep == FastShimmerSweep.beam
+            ? _beamGradient(theme, value)
+            : _washGradient(theme, value);
 
         return _FastShimmerScopeInherited(
           value: value,
           child: ShaderMask(
-            blendMode: BlendMode.srcATop,
+            // srcIn: dest is only a mask. srcATop + translucent shader colors
+            // over white glyphs collapses back to white and hides the beam.
+            // srcIn：目标只当遮罩。srcATop 加半透明着色叠在白色字形上
+            // 会混回纯白，文字扫光看起来像没动。
+            blendMode: BlendMode.srcIn,
             shaderCallback: (Rect bounds) {
-              return gradient.createShader(
-                Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-              );
+              return gradient.createShader(bounds);
             },
             child: child!,
           ),
         );
       },
     );
+  }
+
+  /// Legacy skeleton wash: wide base → highlight → base, stops follow [value].
+  /// 骨架用的宽幅洗刷：底色 → 高光 → 底色，stops 跟随 [value]。
+  LinearGradient _washGradient(FastShimmerTheme theme, double value) {
+    return theme.direction.toGradient(
+      colors: <Color>[
+        theme.baseColor,
+        theme.highlightColor,
+        theme.baseColor,
+      ],
+      stops: <double>[
+        (value - 0.3).clamp(0.0, 1.0),
+        value.clamp(0.0, 1.0),
+        (value + 0.3).clamp(0.0, 1.0),
+      ],
+    );
+  }
+
+  /// Slanted soft sheen. Peak travels from just off-start to just off-end
+  /// so the pause at `1.0` leaves only [FastShimmerTheme.baseColor].
+  /// 斜向柔光。峰值从起点外侧走到终点外侧，停在 `1.0` 时只剩底色。
+  LinearGradient _beamGradient(FastShimmerTheme theme, double value) {
+    final double half = widget.bandWidth.clamp(0.08, 0.55);
+    final double peak = -half + (1.0 + 2 * half) * value;
+    final Color mid = Color.lerp(theme.baseColor, theme.highlightColor, 0.28)!;
+
+    return LinearGradient(
+      begin: theme.direction.begin,
+      end: theme.direction.end,
+      colors: <Color>[
+        theme.baseColor,
+        mid,
+        theme.highlightColor,
+        mid,
+        theme.baseColor,
+      ],
+      stops: _beamStops(peak, half),
+      transform: widget.sheenRotation == 0
+          ? null
+          : GradientRotation(widget.sheenRotation),
+    );
+  }
+
+  /// Five stops around [peak], clamped and non-decreasing in `0`–`1`.
+  /// 以 [peak] 为中心的五个 stop，钳制在 `0`–`1` 且单调不减。
+  List<double> _beamStops(double peak, double half) {
+    final List<double> stops = <double>[
+      (peak - half).clamp(0.0, 1.0),
+      (peak - half * 0.38).clamp(0.0, 1.0),
+      peak.clamp(0.0, 1.0),
+      (peak + half * 0.38).clamp(0.0, 1.0),
+      (peak + half).clamp(0.0, 1.0),
+    ];
+    for (int i = 1; i < stops.length; i++) {
+      if (stops[i] < stops[i - 1]) {
+        stops[i] = stops[i - 1];
+      }
+    }
+    return stops;
   }
 }
 

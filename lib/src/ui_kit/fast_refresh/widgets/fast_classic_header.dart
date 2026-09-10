@@ -89,7 +89,7 @@ class FastClassicHeader extends FastRefreshHeader {
   /// 进度圈线宽。见 [CircularProgressIndicator.strokeWidth]。
   final double? progressIndicatorStrokeWidth;
 
-  /// 创建 Classic Header。未传文案时使用英文默认值。
+  /// 创建 Classic Header。未传文案时走 [FastRefreshTheme]，再回退英文默认值。
   const FastClassicHeader({
     this.key,
     super.triggerOffset = 70,
@@ -140,21 +140,23 @@ class FastClassicHeader extends FastRefreshHeader {
 
   @override
   Widget build(BuildContext context, FastRefreshIndicatorState state) {
+    final FastRefreshTheme theme = FastRefreshTheme.resolve(context);
+    final FastRefreshIndicatorTexts texts = theme.headerTexts;
     return _FastClassicIndicator(
       key: key,
       state: state,
       backgroundColor: backgroundColor,
       boxDecoration: boxDecoration,
       mainAxisAlignment: mainAxisAlignment,
-      dragText: dragText ?? 'Pull to refresh',
-      armedText: armedText ?? 'Release ready',
-      readyText: readyText ?? 'Refreshing...',
-      processingText: processingText ?? 'Refreshing...',
-      processedText: processedText ?? 'Succeeded',
-      noMoreText: noMoreText ?? 'No more',
-      failedText: failedText ?? 'Failed',
+      dragText: dragText ?? texts.dragText,
+      armedText: armedText ?? texts.armedText,
+      readyText: readyText ?? texts.readyText,
+      processingText: processingText ?? texts.processingText,
+      processedText: processedText ?? texts.processedText,
+      noMoreText: noMoreText ?? texts.noMoreText,
+      failedText: failedText ?? texts.failedText,
       showText: showText,
-      messageText: messageText ?? 'Last updated at %T',
+      messageText: messageText ?? texts.messageText,
       showMessage: showMessage,
       textDimension: textDimension,
       iconDimension: iconDimension,
@@ -164,14 +166,15 @@ class FastClassicHeader extends FastRefreshHeader {
       failedIcon: failedIcon,
       noMoreIcon: noMoreIcon,
       pullIconBuilder: pullIconBuilder,
-      textStyle: textStyle,
+      textStyle: textStyle ?? theme.textStyle,
       textBuilder: textBuilder,
-      messageStyle: messageStyle,
+      messageStyle: messageStyle ?? theme.messageStyle,
       messageBuilder: messageBuilder,
       clipBehavior: clipBehavior,
-      iconTheme: iconTheme,
-      progressIndicatorSize: progressIndicatorSize,
-      progressIndicatorStrokeWidth: progressIndicatorStrokeWidth,
+      iconTheme: iconTheme ?? theme.iconTheme,
+      progressIndicatorSize: progressIndicatorSize ?? theme.progressIndicatorSize,
+      progressIndicatorStrokeWidth:
+          progressIndicatorStrokeWidth ?? theme.progressIndicatorStrokeWidth,
     );
   }
 }

@@ -1,5 +1,5 @@
 ---
-title: Shimmer Skeletons
+title: Shimmer
 outline: [2, 3]
 ---
 
@@ -13,18 +13,19 @@ outline: [2, 3]
 
 ## Overview {#overview}
 
-The `FastShimmer` family provides **hand-crafted loading skeletons** with a synchronized highlight sweep. Compose layouts with `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList`, and let `FastShimmerScope` drive one shared `AnimationController` plus `ShaderMask` so every descendant stays in phase.
+The `FastShimmer` family provides **hand-crafted loading skeletons** and **decorative highlight sweeps**. Compose skeletons with `FastShimmerBox` / `FastShimmerCircle` / `FastShimmerText` / `FastShimmerList`; sweep a thin white beam across real text / icons / thumbs with `FastShimmerHighlight`. `FastShimmerScope` drives one shared `AnimationController` plus `ShaderMask` so every descendant in that scope stays in phase.
 
 | Topic | Notes |
 | --- | --- |
-| Entry point | `FastShimmer(isLoading, skeleton, child)` |
-| Sync animation | `FastShimmerScope` (auto-wrapped by `FastShimmer` when no ancestor scope exists) |
-| Placeholders | `Box` / `Circle` / `Text` / `List` |
+| Loading entry | `FastShimmer(isLoading, skeleton, child)` |
+| Sync animation | `FastShimmerScope` (auto-wrapped by `FastShimmer` / `FastShimmerHighlight` when no ancestor exists) |
+| Placeholders | `Box` / `Circle` / `Text` (skeleton bars) / `List` |
+| Decorative sweep | `FastShimmerHighlight` (thin beam) / `FastShimmerSlideUnlock` (draggable; `area` whole bar / `label` text only) |
 | Theming | `FastShimmerTheme` (`ThemeExtension`) + `FastShimmerDirection` |
-| **Not provided** | Auto-inferring skeleton shapes from `child` |
+| **Not provided** | Auto-inferring skeleton shapes from `child`; dragging does not fade the label |
 
 ::: tip
-Skeleton children must be **opaque** (package placeholders default to white) so the `ShaderMask` gradient is visible. See the example app’s `ShimmerExample` page for a full demo.
+Pixels under the sweep must be **opaque** (package placeholders default to white; real text should use a solid glyph color — the text factory forces white). Visible colors come from the theme, not the child’s own `color`. See the example app’s `ShimmerExample` hub (skeleton / highlight / slide unlock).
 :::
 
 ---
@@ -69,6 +70,48 @@ FastShimmerScope(
       FastShimmerText(lines: 2, width: 160),
     ],
   ),
+);
+```
+
+---
+
+## Decorative highlight {#shimmer-highlight}
+
+`FastShimmerText` is a **paragraph skeleton**. To shine real glyphs, wrap an opaque `Text` / `Icon` with `FastShimmerHighlight`:
+
+```dart
+FastShimmerHighlight.text(
+  'Slide to unlock',
+  style: const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    color: Color(0x66FFFFFF), // used as baseColor when omitted
+  ),
+  highlightColor: Colors.white,
+);
+```
+
+Default motion is a thin white band: about **3 s** left → right, then a **~1.8 s** pause before the next loop. Glyph color stays put — it does not fade. `ShaderMask` only tints opaque pixels of [child]; keep the track / card background outside the scope so it stays still.
+
+Any opaque child works:
+
+```dart
+FastShimmerHighlight(
+  baseColor: const Color(0xFF9E9E9E),
+  highlightColor: Colors.white,
+  child: const Icon(Icons.chevron_right, color: Colors.white),
+);
+```
+
+Draggable slide-to-unlock: a slanted soft sheen sweeps left → right in about **3 s**, then pauses about **1.8 s** before looping. Both wrap styles share that timing — `area` sweeps the metal capsule (centered label and thumb sit on top), `label` sweeps only the centered hint glyphs (track and thumb stay still). Keep the page / card background outside the control so it does not move; the label does not fade while dragging; `resetOnUnlock` returns the thumb after unlock:
+
+```dart
+FastShimmerSlideUnlock(
+  label: 'Slide to unlock',
+  highlight: FastShimmerSlideUnlockHighlight.area, // or .label
+  successLabel: 'Unlocked',
+  resetOnUnlock: true,
+  onUnlocked: _unlock,
 );
 ```
 
@@ -132,13 +175,21 @@ While loading, Semantics use label `Loading` with `excludeSemantics`. If an ance
 const FastShimmerScope({
   required Widget child,
   Duration duration = const Duration(milliseconds: 1500),
+  Duration pauseDuration = Duration.zero,
+  FastShimmerSweep sweep = FastShimmerSweep.wash,
+  double bandWidth = 0.18,
+  double sheenRotation = FastShimmerScope.beamSheenRotation,
 });
 ```
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
 | `child` | `Widget` | yes | Skeleton subtree under the shimmer mask |
-| `duration` | `Duration` | no | One full highlight cycle; default 1500 ms |
+| `duration` | `Duration` | no | **Sweep** length (not including pause); 1500 ms for skeletons |
+| `pauseDuration` | `Duration` | no | Hold after the sweep; default `0` (continuous skeleton wash) |
+| `sweep` | `FastShimmerSweep` | no | `wash` for skeletons; `beam` for a slanted soft sheen |
+| `bandWidth` | `double` | no | Beam width as a fraction of the sweep axis; `beam` only; wider is softer |
+| `sheenRotation` | `double` | no | Beam tilt in radians; default about -0.45; use `0` for a straight text swipe |
 
 Static helpers:
 
@@ -261,6 +312,89 @@ const FastShimmerText({
 | `width` | Full width of non-last lines |
 | `lastLineWidthFraction` | Last line as a fraction of `width`, range `(0, 1]` |
 
+This is a paragraph **skeleton**, not a sweep on real glyphs. Use `FastShimmerHighlight` for real text.
+
+---
+
+#### `FastShimmerHighlight` {#fast-shimmer-highlight}
+
+```dart
+const FastShimmerHighlight({
+  required Widget child,
+  Duration? duration,
+  Duration? pauseDuration,
+  double? bandWidth,
+  Color? baseColor,
+  Color? highlightColor,
+  FastShimmerDirection? direction,
+});
+
+factory FastShimmerHighlight.text(
+  String data, {
+  TextStyle? style,
+  TextAlign? textAlign,
+  int? maxLines,
+  TextOverflow? overflow,
+  Duration? duration,
+  Duration? pauseDuration,
+  double? bandWidth,
+  Color? baseColor,
+  Color? highlightColor,
+  FastShimmerDirection? direction,
+});
+```
+
+| Parameter | Description |
+| --- | --- |
+| `child` | Opaque content that receives the sweep (typically solid `Text` / `Icon` / thumb) |
+| `duration` | Sweep length; default **3 s**; ignored if an ancestor Scope exists |
+| `pauseDuration` | Hold after the sweep; default **1.8 s** |
+| `bandWidth` | Beam width fraction; default `0.18` |
+| `baseColor` / `highlightColor` / `direction` | Theme overrides only when this widget creates its own Scope |
+
+The `text` factory forces an opaque white glyph color so `ShaderMask` can paint. When `baseColor` is omitted, `style.color` becomes the shimmer base. If an ancestor `FastShimmerScope` exists, a second scope is **not** wrapped and color / timing overrides do not apply. A locally created scope uses `FastShimmerSweep.beam`.
+
+---
+
+#### `FastShimmerSlideUnlock` {#fast-shimmer-slide-unlock}
+
+```dart
+const FastShimmerSlideUnlock({
+  String label = '滑动解锁',
+  String? successLabel,
+  VoidCallback? onUnlocked,
+  double height = 60,
+  double thumbSize = 52,
+  double threshold = 0.85,
+  bool enabled = true,
+  bool resetOnUnlock = true,
+  FastShimmerSlideUnlockHighlight highlight =
+      FastShimmerSlideUnlockHighlight.label,
+  Color? trackColor,
+  Color thumbColor = Colors.white,
+  IconData? thumbIcon,
+  IconData? successIcon,
+  TextStyle? labelStyle,
+  Color? baseColor,
+  Color? highlightColor,
+  Duration? duration,
+  Duration? pauseDuration,
+});
+```
+
+| Parameter | Description |
+| --- | --- |
+| `label` | Hint text (does not fade while dragging) |
+| `successLabel` | Optional post-unlock label |
+| `onUnlocked` | Called once after the slide crosses `threshold` and settles |
+| `threshold` | Required progress in `(0, 1]`; default `0.85` |
+| `enabled` | When `false`, the thumb cannot be dragged |
+| `resetOnUnlock` | Whether the thumb returns after the callback (default `true`) |
+| `highlight` | `area` sweeps the capsule; `label` sweeps only the text (default) |
+| `duration` / `pauseDuration` | Beam sweep / pause; default 3 s / 1.8 s; shared by both wrap styles |
+
+The beam travels the slider width. `area` puts an opaque capsule in the mask (metal sheen) with the label and thumb on top; `label` keeps only the glyphs opaque, with the track and thumb outside the mask. In RTL the thumb travels right → left.
+
 ---
 
 #### `FastShimmerList` {#fast-shimmer-list}
@@ -335,11 +469,44 @@ Theme(
 
 Without a Scope, placeholders still render (theme base color) but without motion—useful for layout debugging or when animation is not needed yet.
 
+### Highlight text {#shimmer-text-recipe}
+
+```dart
+FastShimmerHighlight.text(
+  'FAST PACKAGE',
+  style: const TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    color: Color(0xFFC9A227),
+  ),
+  highlightColor: const Color(0xFFFFF4C2),
+);
+```
+
+### Slide to unlock {#shimmer-slide-unlock-recipe}
+
+```dart
+FastShimmerSlideUnlock(
+  label: 'Slide to unlock',
+  highlight: FastShimmerSlideUnlockHighlight.area,
+  successLabel: 'Unlocked',
+  resetOnUnlock: true,
+  onUnlocked: () {
+    // Business after unlock
+  },
+);
+```
+
+See `shimmer_example/slide_hint` in the example app.
+
 ---
 
 ## Notes {#shimmer-notes}
 
 - **Hand-crafted only**: `skeleton` is required; there is no auto-detect / shape detector.
-- **One Scope**: Prefer one scope per screen or loading subtree; nesting is allowed but usually unnecessary.
+- **Two text widgets**: `FastShimmerText` = skeleton bars; `FastShimmerHighlight` = thin beam on real glyphs.
+- **wash vs beam**: Skeletons default to a continuous `wash`; decorative highlight defaults to a slanted soft `beam` (3 s sweep + 1.8 s pause).
+- **One Scope**: Prefer one scope per screen or loading subtree; nesting is allowed but usually unnecessary. `FastShimmerHighlight` inside a loading scope reuses the ancestor sweep; local color / timing overrides do not apply.
+- **Opaque pixels**: `BlendMode.srcIn` uses the child as a mask; visible color comes from the shimmer gradient. Keep backgrounds outside the scope. Text highlights need an **opaque** base (translucent white on white glyphs cancels the beam). Text color does not fade with the animation.
 - **Accessibility**: Honors `MediaQuery.disableAnimations`; loading is announced as `Loading` by `FastShimmer`.
 - **Performance**: The sweep runs at the Scope layer; placeholders are not rebuilt every animation frame.

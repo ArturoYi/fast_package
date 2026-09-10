@@ -26,10 +26,11 @@
 | --- | --- | --- |
 | 协议 | `fast_refresh_indicator.dart` | 模式、结果、配置、快照 |
 | 组装 | `fast_refresh_widget.dart`、`builder/fast_refresh_builder.dart`、`fast_refresh_behavior.dart` | 注入物理、叠 Header / Footer；Widget 构造 vs builder |
-| 控制 | `fast_refresh_controller.dart` | 编程触发 / 结束 / 重置 |
+| 分页 | `fast_paging.dart`、`fast_paging_list.dart` | 页码 / 总数 / 空态接到 onRefresh / onLoad；日常用 `FastPagingList` |
+| 外观 | `fast_refresh_theme.dart`、`widgets/fast_classic_*.dart`、`widgets/fast_material_indicator.dart` | Classic 默认；可选 Material；文案走 Theme |
+| 控制 | `fast_refresh_controller.dart` | 编程触发 / 结束 / 重置；dispose 时解绑 |
 | 状态机 | `fast_refresh_notifier.dart` | `offset` → `mode` → 任务 |
 | 手感 | `fast_refresh_physics.dart` | 摩擦、边界钳制、弹簧回弹 |
-| 外观 | `widgets/fast_classic_*.dart` | 箭头、文案、转圈 |
 | 进阶 | `header/`、`footer/` 的 locator、二楼、clamping、Nested | 特殊布局与坐标系 |
 
 库入口是 `fast_refresh.dart`，其余文件以 `part of` 挂入。
@@ -95,8 +96,11 @@ inactive → drag → armed → ready → processing → processed → done → 
 3. 滑到底 → 自动加载
 4. `controller.callRefresh()` / `finishRefresh()`
 5. 返回 `noMore` 后再 `resetFooter`
+6. Paging 页：`FastPaging` 用 `page` / `total` 自动收 `noMore`，空态和 refreshOnStart 占位
 
 目标：知道**对外行为**，后面读代码才有对照。
+
+分页不是另一套刷新。`fast_paging.dart` 只是把页码 / 总数 / 空态接到现有 `onRefresh` / `onLoad`。对照参考仓库的 `packages/easy_paging`。
 
 ### 第 1 步：协议层
 

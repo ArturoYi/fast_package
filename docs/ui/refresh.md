@@ -24,7 +24,8 @@ outline: [2, 3]
 | 主入口 | `FastRefresh(onRefresh, onLoad, child)`，也可用 `FastRefresh.builder` |
 | 控制器 | `FastRefreshController`：`callRefresh` / `callLoad` / `finish*` / `resetFooter` |
 | 结果 | `success` / `fail` / `noMore` |
-| 默认指示器 | `FastClassicHeader` / `FastClassicFooter` |
+| 分页 | `FastPagingList`（`fetchPage`）或继承 `FastPaging` |
+| 默认指示器 | `FastClassicHeader` / `FastClassicFooter`；可选 `FastMaterial*` |
 | 自定义 | `FastBuilderHeader` / `FastBuilderFooter`，或 `FastListenerHeader` / `Locator` |
 | 物理 | bouncing（列表跟着走）与 clamping（列表不动、指示器动） |
 
@@ -80,7 +81,7 @@ FastRefresh(
 
 ---
 
-## Widget 构造 vs builder {#widget-vs-builder}
+## Widget vs builder {#widget-vs-builder}
 
 默认构造把 physics 注入作用域；`FastRefresh.builder` 把 physics 交给你。
 
@@ -126,7 +127,7 @@ AppBar 放在 `FastRefresh` 外面，刷新从列表顶开始。不要把 `Slive
 | 缺点 | 漏写 `physics: physics` 时列表仍是平台默认物理，刷新不会触发 |
 | 适用 | `NestedScrollView`、`PageView` 套列表、外层还有独立滚动 |
 
-拿不准先用 Widget 构造；出现「里层列表把刷新抢走」再换成 builder。可配合 `isNested: true`。example 入口有 Widget、Builder、Nested、Locator、refreshOnStart、clamping、横向、二楼。
+拿不准先用 Widget 构造；出现「里层列表把刷新抢走」再换成 builder。可配合 `isNested: true`。example 入口有 Widget、Builder、Nested、Locator、refreshOnStart、Paging、clamping、横向、二楼。
 
 ---
 
@@ -148,7 +149,9 @@ inactive → drag → armed → ready → processing → processed → done → 
 
 Footer 默认 `infiniteOffset = 70`：距底部小于 70 即自动加载，不必先越界再松手。传入 `infiniteOffset: null` 可改回「拉过阈值再松手」。
 
-刷新成功且 `resetAfterRefresh` 为 true（默认）时，会清掉 Footer 的 `noMore`。
+刷新**成功**且 `resetAfterRefresh` 为 true（默认）时，会清掉 Footer 的 `noMore`。失败、抛错或 `noMore` 不会清。接管完成时，改到 `finishRefresh(success)` 才 reset。
+
+`FastRefresh` 销毁或更换 controller 后，旧控制器上的 `callRefresh` / `finishRefresh` 为空操作。
 
 默认刷新与加载互斥；需要同时进行时设 `simultaneously: true`。
 
@@ -156,13 +159,110 @@ Footer 默认 `infiniteOffset = 70`：距底部小于 70 即自动加载，不�
 
 ## 更多能力 {#more}
 
+与 example 入口同一顺序：
+
 - **`FastRefresh.builder`**：见 [Widget 构造 vs builder](#widget-vs-builder)。example 的 `refresh_example/builder`。
-- **`refreshOnStart`**：首帧构建完成后自动触发刷新。example 的 `refresh_example/refresh_on_start`。
-- **`FastHeaderLocator` / `FastFooterLocator`**：把指示器放进列表内部（`position: locator`）。example 的 `refresh_example/locator`。
-- **`clamping: true`**：列表不跟着越界，只有指示器移动（Material 风格）。example 的 `refresh_example/clamping`。
 - **`isNested: true`**：`NestedScrollView` 外层钉顶栏、内层列表刷新。example 的 `refresh_example/nested`。
+- **`FastHeaderLocator` / `FastFooterLocator`**：把指示器放进列表内部（`position: locator`）。example 的 `refresh_example/locator`。
+- **`refreshOnStart`**：首帧构建完成后自动触发刷新。example 的 `refresh_example/refresh_on_start`。
+- **`FastPaging` / `FastPagingList`**：页码 / 总数 / 空态接到刷新与加载。`FastPagingList` 只需 `fetchPage` + `itemBuilder`。example 的 `refresh_example/paging`。见 [分页](#paging)。
+- **`clamping: true`**：列表不跟着越界，只有指示器移动。example 的 `refresh_example/clamping`。
+- **`FastMaterialHeader` / `FastMaterialFooter`**：系统月牙转圈。example 的 `refresh_example/material`。见 [Material](#material)。
+- **`FastRefreshTheme`**：Classic 文案与 Material 颜色走 `ThemeExtension`。见 [Theme](#theme)。
 - **横向**：`ListView` / `PageView` 的 `scrollDirection` 为 horizontal。example 的 `refresh_example/horizontal`。见 [横向](#horizontal)。
 - **二楼**：继续下拉打开第二页。example 的 `refresh_example/secondary`。见 [二楼](#secondary)。
+
+---
+
+## 分页 {#paging}
+
+日常列表用 `FastPagingList<T>`，不必写子类：
+
+```dart
+FastPagingList<String>(
+  refreshOnStart: true,
+  fetchPage: (page) async {
+    final res = await api.list(page);
+    return FastPagingPage(
+      items: res.items,
+      page: res.page,
+      total: res.total,
+    );
+  },
+  itemBuilder: (context, index, item) => ListTile(title: Text(item)),
+)
+```
+
+`isNoMore`：显式 `hasMore` → `total` / `page`+`totalPage` → 最近一次成功页的 `items` 为空。复杂 data 仍用 `FastPaging` 子类。
+
+`FastPaging<DataType, ItemType>` 对齐 EasyRefresh 配套的 `EasyPaging`：子类只维护数据和页码，刷新 / 加载生命周期、空态、`noMore` 由基类接到 `FastRefresh`。
+
+`isNoMore` 优先看 `total`（`count >= total`），否则看 `page >= totalPage`。`onLoad` 不返回结果时，基类按这个值给出 `noMore` 或 `success`。第一页已经装完时，刷新结束后会把 Footer 锁成 `noMore`。
+
+```dart
+class CustomPaging extends FastPaging<List<String>, String> {
+  const CustomPaging({super.key, super.refreshOnStart = true, super.itemBuilder});
+
+  @override
+  FastPagingState<List<String>, String, CustomPaging> createState() =>
+      _CustomPagingState();
+}
+
+class _CustomPagingState
+    extends FastPagingState<List<String>, String, CustomPaging> {
+  @override
+  int get count => data?.length ?? 0;
+
+  @override
+  String getItem(int index) => data![index];
+
+  @override
+  int? page;
+
+  @override
+  int? total;
+
+  @override
+  int? totalPage;
+
+  @override
+  Widget buildItem(BuildContext context, int index, String item) {
+    return buildItemByBuilder(context, index, item);
+  }
+
+  @override
+  Future<FastRefreshResult?> onRefresh() async {
+    final first = await fetchPage(1);
+    setState(() {
+      data = first.items;
+      page = first.page;
+      total = first.total;
+    });
+    return null;
+  }
+
+  @override
+  Future<FastRefreshResult?> onLoad() async {
+    final next = await fetchPage(page! + 1);
+    setState(() {
+      data = <String>[...data!, ...next.items];
+      page = next.page;
+      total = next.total;
+    });
+    return null;
+  }
+}
+```
+
+| 要点 | 说明 |
+| --- | --- |
+| 默认构造 | `useDefaultPhysics: false`，走 `FastRefresh.builder`，physics 挂到内部 `CustomScrollView` |
+| Widget 构造 | `useDefaultPhysics: true`，适合单列表、没有嵌套滚动 |
+| 空态 | `isEmpty` 时用 `emptyWidgetBuilder` 或覆写 `buildEmptyWidget` |
+| 进入页 | `refreshOnStart` + `refreshOnStartWidgetBuilder` |
+| Locator | Header / Footer 的 `position` 为 `locator` 时自动插入 Locator sliver |
+
+完整演示见 example 的 `refresh_example/paging`（45 条、每页 10 条，可切空态和 Widget 构造）。
 
 ---
 
@@ -257,6 +357,54 @@ FastRefresh(
 - 返回键：二楼打开时用 `PopScope(canPop: false)` 调 `closeHeaderSecondary()`
 
 `FastRefresh.clipBehavior` 必须是 `Clip.none`，否则高出 trigger 的二楼页会被裁掉。完整配方见 example 的 `refresh_example/secondary`。
+
+---
+
+## Material {#material}
+
+默认皮肤仍是 Classic。要系统下拉那种月牙转圈，换 `FastMaterialHeader`（默认 `clamping: true`）。`FastMaterialFooter` 用 `CircularProgressIndicator`，默认仍触底加载（`infiniteOffset: 70`，`clamping` 为 false，与现有「clamping 不能搭配无限加载」约束一致）。
+
+```dart
+FastRefresh(
+  header: const FastMaterialHeader(),
+  footer: const FastMaterialFooter(),
+  onRefresh: () async {},
+  onLoad: () async {},
+  child: ListView(),
+);
+```
+
+---
+
+## Theme {#theme}
+
+`FastRefreshTheme` 是 `ThemeExtension`。Classic 文案 / 样式与 Material 颜色按「构造参数 → Theme → light/dark 英文默认」解析。不改变触发距离或弹簧。
+
+```dart
+ThemeData(
+  extensions: [
+    FastRefreshTheme(
+      headerTexts: FastRefreshIndicatorTexts(
+        dragText: '下拉刷新',
+        armedText: '释放刷新',
+        readyText: '正在刷新...',
+        processingText: '正在刷新...',
+        processedText: '刷新成功',
+        noMoreText: '没有更多了',
+        failedText: '刷新失败',
+        messageText: '上次更新 %T',
+      ),
+      footerTexts: FastRefreshIndicatorTexts.footerEnglish.copyWith(
+        dragText: '上拉加载',
+        noMoreText: '没有更多了',
+      ),
+      indicatorColor: Colors.blue,
+    ),
+  ],
+)
+```
+
+未挂 Theme 时 Classic 仍是英文默认（`Pull to refresh`）。
 
 ---
 
