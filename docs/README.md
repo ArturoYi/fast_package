@@ -24,11 +24,33 @@ npm run docs:build
 npm run docs:preview
 ```
 
+文档首页与顶栏的「在线演示」会跳到 `/example/`（嵌套的 Flutter Web 示例）。该目录不由 VitePress 生成，需要先构建 example 再拷进 `dist`：
+
+```bash
+cd ../example
+flutter pub get
+flutter build web --release --base-href /fast_package/example/
+
+cd ../docs
+npm run docs:build
+cp -R ../example/build/web .vitepress/dist/example
+npm run docs:preview
+```
+
+预览地址：
+
+- 文档：<http://localhost:4173/fast_package/>
+- 示例：<http://localhost:4173/fast_package/example/>
+
+`docs:dev` 只跑文档站，默认没有 Flutter 产物；要联调演示按钮，按上面步骤用 `docs:preview`。
+
 ## GitHub Pages 部署
 
 1. 在 GitHub 仓库 **Settings → Pages** 中，将 **Build and deployment → Source** 设为 **GitHub Actions**。
-2. 向 `master` 分支推送包含 `docs/` 的变更后，`.github/workflows/docs.yml` 会自动构建并部署。
-3. 线上地址：<https://arturoyi.github.io/fast_package/>
+2. 向 `master` 分支推送包含 `docs/`、`example/` 或 `lib/` 的变更后，`.github/workflows/docs.yml` 会构建 VitePress 与 Flutter Web，并将示例嵌到 `/example/` 后部署。
+3. 线上地址：
+   - 文档：<https://arturoyi.github.io/fast_package/>
+   - 示例：<https://arturoyi.github.io/fast_package/example/>
 
 ## 多语言
 

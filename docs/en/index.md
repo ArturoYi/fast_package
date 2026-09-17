@@ -10,6 +10,10 @@ hero:
     alt: Fast Package Logo
   actions:
     - theme: brand
+      text: Live Demo
+      link: /example/
+      target: _blank
+    - theme: alt
       text: Getting Started
       link: /en/guide/getting-started
     - theme: alt

@@ -163,3 +163,48 @@
 .doc-credit a:hover {
   text-decoration: underline;
 }
+
+/* Real <a> so /example/ is a full navigation, not a VitePress 404 */
+.demo-launch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  color: #fff;
+  background-color: var(--vp-c-brand-1);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.demo-launch:hover {
+  color: #fff;
+  background-color: var(--vp-c-brand-2);
+}
+
+.dark .demo-launch {
+  color: #0b1b2b;
+}
+
+.demo-launch--nav {
+  margin-left: 8px;
+}
+
+.demo-launch--screen {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  margin-top: 12px;
+  border-radius: 8px;
+}
+
+@media (max-width: 959px) {
+  .demo-launch--nav {
+    display: none;
+  }
+}

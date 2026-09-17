@@ -10,6 +10,10 @@ hero:
     alt: Fast Package Logo
   actions:
     - theme: brand
+      text: 在线演示
+      link: /example/
+      target: _blank
+    - theme: alt
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
