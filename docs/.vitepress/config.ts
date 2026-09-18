@@ -4,7 +4,7 @@ const siteBase = '/fast_package/'
 
 /** head 里的绝对路径不会自动加 base，需与 siteBase 一致（见 themeConfig.logo 的自动处理） */
 const sharedHead: HeadConfig[] = [
-  ['link', { rel: 'icon', href: `${siteBase}favicon.svg`, type: 'image/svg+xml' }],
+  ['link', { rel: 'icon', href: `${siteBase}logo.svg`, type: 'image/svg+xml' }],
 ]
 
 const sharedLogo = {
@@ -84,6 +84,8 @@ const sidebarZhGroups = [
       { text: 'Toast', link: '/ui/toast' },
       { text: 'Loading', link: '/ui/loading' },
       { text: 'Refresh 刷新加载', link: '/ui/refresh' },
+      { text: 'Slidable 滑动操作', link: '/ui/slidable' },
+      { text: 'Animated List 动画列表', link: '/ui/animated-list' },
     ],
   },
   {
@@ -126,6 +128,8 @@ const sidebarEnGroups = [
       { text: 'Toast', link: '/en/ui/toast' },
       { text: 'Loading', link: '/en/ui/loading' },
       { text: 'Refresh', link: '/en/ui/refresh' },
+      { text: 'Slidable', link: '/en/ui/slidable' },
+      { text: 'Animated List', link: '/en/ui/animated-list' },
     ],
   },
   {

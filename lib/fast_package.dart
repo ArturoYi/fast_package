@@ -51,5 +51,11 @@ export 'src/ui_kit/fast_loading/fast_loading_config.dart';
 // refresh（下拉刷新 / 上拉加载；对齐 EasyRefresh 核心物理与状态机）
 export 'src/ui_kit/fast_refresh/fast_refresh.dart';
 
+// slidable（列表项滑动操作；满滑删除；与竖直 FastRefresh 共存）
+export 'src/ui_kit/fast_slidable/fast_slidable.dart';
+
+// animated list（增删动画 / 拖拽排序；组合入口共用核心）
+export 'src/ui_kit/fast_animated_composite_list/fast_animated_composite_list.dart';
+
 // ---------------------------scan utils---------------------------
 export 'src/utils/fast_scan/fast_scan.dart';

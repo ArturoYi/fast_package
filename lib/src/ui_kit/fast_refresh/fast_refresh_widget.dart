@@ -251,6 +251,14 @@ class FastRefresh extends StatefulWidget {
         'Please use it in the scope of FastRefresh!');
     return inheritedFastRefresh!.data;
   }
+
+  /// Reads [FastRefreshData] when inside a [FastRefresh]; otherwise `null`.
+  /// 在 [FastRefresh] 子树内读取 [FastRefreshData]；否则返回 `null`。
+  static FastRefreshData? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<_InheritedFastRefresh>()
+        ?.data;
+  }
 }
 
 /// [FastRefresh] 的状态：组装 physics、notifier，并按 position 叠指示器。

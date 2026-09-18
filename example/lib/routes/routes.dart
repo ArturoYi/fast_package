@@ -3,6 +3,8 @@ import 'package:example/pages/gradient_border_example/gradient_border_example.da
 import 'package:example/pages/index/example_index.dart';
 import 'package:example/pages/shimmer_example/shimmer_example.dart';
 import 'package:example/pages/refresh_example/refresh_example.dart';
+import 'package:example/pages/animated_list_example/animated_list_example.dart';
+import 'package:example/pages/slidable_example/slidable_example.dart';
 import 'package:example/pages/toast_example/toast_example.dart';
 import 'package:example/pages/loading_example/loading_example.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,6 +32,9 @@ class ExampleRoute {
   static String loading = '/loading';
   //refresh
   static String refresh = '/refresh';
+  //slidable
+  static String slidable = '/slidable';
+  static String animatedList = '/animated-list';
 
   static Map<String, Widget Function(BuildContext)> get routes => {
         index: (context) => ExampleIndex(),
@@ -40,5 +45,7 @@ class ExampleRoute {
         toast: (context) => const ToastExample(),
         loading: (context) => const LoadingExample(),
         refresh: (context) => const RefreshExample(),
+        slidable: (context) => const SlidableExample(),
+        animatedList: (context) => const AnimatedListExample(),
       };
 }

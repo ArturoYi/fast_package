@@ -34,6 +34,8 @@
     ·
     <a href="https://arturoyi.github.io/fast_package/">中文文档</a>
     ·
+    <a href="https://arturoyi.github.io/fast_package/example/">Demo</a>
+    ·
     <a href="https://github.com/ArturoYi/fast_package/issues">Issues</a>
   </strong>
 </p>
@@ -65,7 +67,7 @@ The pace stays **small and verifiable**: each module should have a clear purpose
 | **Features** | Keep adding high-frequency utilities and lightweight UI. Stabilize existing APIs before expanding. |
 | **Implementation** | Business logic and public APIs are **written by hand** so they stay readable, reviewable, and predictable. |
 | **AI** | Used for **docs, examples, and test help**—not as a substitute for core design or review of critical paths. |
-| **Docs** | Install, API, and examples live on the **[docs site](https://arturoyi.github.io/fast_package/en/)**. This README is project context only. |
+| **Docs** | Install, API, and examples live on the **[docs site](https://arturoyi.github.io/fast_package/en/)**. A live **[demo](https://arturoyi.github.io/fast_package/example/)** is published with the docs via GitHub Actions. This README is project context only. |
 
 ---
 

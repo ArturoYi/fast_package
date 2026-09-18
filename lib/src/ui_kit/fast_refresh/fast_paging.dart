@@ -125,6 +125,14 @@ abstract class FastPagingState<DataType, ItemType,
   /// 当前已加载的数据。尚未请求成功时为 `null`。
   DataType? data;
 
+  /// Replaces [data] and rebuilds. Use after a local edit such as swipe-delete.
+  /// 替换 [data] 并重建。侧滑删除等本地改动后调用。
+  void replaceData(DataType next) {
+    setState(() {
+      data = next;
+    });
+  }
+
   /// 总页数。与 [page] 一起用于 [isNoMore]；也可只提供 [total]。
   int? get totalPage;
 

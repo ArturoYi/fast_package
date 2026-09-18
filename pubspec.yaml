@@ -1,6 +1,6 @@
 name: fast_package
-description: "A lightweight Flutter toolkit with debounce/throttle, async queue, extensions, and UI widgets (Toast, Loading, Shimmer, Refresh, gradient borders). Depends only on the Flutter SDK."
-version: 0.0.5
+description: "A lightweight Flutter toolkit with debounce/throttle, async queue, extensions, and UI widgets (Toast, Loading, Shimmer, Refresh, Slidable, animated list, gradient borders). Depends only on the Flutter SDK."
+version: 0.0.6
 homepage: https://arturoyi.github.io/fast_package/
 repository: https://github.com/ArturoYi/fast_package
 issue_tracker: https://github.com/ArturoYi/fast_package/issues

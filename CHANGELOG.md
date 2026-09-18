@@ -1,3 +1,17 @@
+## 0.0.6
+
+* Added `FastAnimatedList` / `FastReorderableList` / `FastAnimatedCompositeList`: implicit insert/remove, drag reorder, first-frame stagger
+* Shared list ticker for stagger (no per-item `AnimationController`); large diffs snap after `animationBudget`
+* `FastStagger` for Column / custom lists; `FastListDragHandle` for handle-triggered reorder
+* `onReorder` matches `ReorderableListView`; vertical `FastRefresh` locks drag while pulling / processing
+* Added `FastAnimatedCompositeListTheme` (`ThemeExtension`)
+* Added `FastSlidable`: swipe to reveal actions, iOS-style full swipe, dismiss-to-delete, programmatic `FastSlidableController`
+* Built-in motions: `behind` / `drawer` / `scroll`; vertical axis supported
+* `FastSlidableGroup` keeps one open row per `groupTag`; `closeOnScroll` closes on list scroll
+* Works with vertical `FastRefresh` / `FastPagingList`: refresh drag or processing locks sliding
+* Added `FastRefresh.maybeOf` for optional ancestor lookup
+* Added `FastSlidableTheme` (`ThemeExtension`)
+
 # 0.0.1
 
 * TODO: Describe initial release.

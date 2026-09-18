@@ -10,6 +10,11 @@
             "type": "dart"
         },
         {
+            "name": "example (web)",
+            "request": "launch",
+            "type": "dart",
+        },
+        {
             "name": "example (profile mode)",
             "request": "launch",
             "type": "dart",

@@ -168,6 +168,48 @@ export const credits: Record<string, Record<CreditLocale, LocalizedCredit>> = {
       improvement: 'Flutter SDK only; Classic remains the default. Optional Material indicators; FastPagingList takes fetchPage, so everyday paging needs no FastPaging subclass.',
     },
   },
+  'animated-list': {
+    zh: {
+      source: {
+        name: 'flutter_staggered_animations',
+        url: 'https://github.com/mobiten/flutter_staggered_animations',
+        author: 'mobiten / Dailyn',
+      },
+      usage: '列表 / 网格首屏错开入场，以及增删和拖拽排序。',
+      improvement:
+        '拆成 Animated / Reorderable 两个入口再组合；共享 ticker + 首帧 Limiter；大 diff 整表对齐。不移植 per-item AnimationController。',
+    },
+    en: {
+      source: {
+        name: 'flutter_staggered_animations',
+        url: 'https://github.com/mobiten/flutter_staggered_animations',
+        author: 'mobiten / Dailyn',
+      },
+      usage: 'First-frame staggered entrance, plus insert/remove and drag reorder.',
+      improvement:
+        'Split into Animated and Reorderable entry points, then a composite; one shared ticker and a first-frame limiter; large diffs snap. No per-item AnimationController.',
+    },
+  },
+  slidable: {
+    zh: {
+      source: {
+        name: 'flutter_slidable',
+        url: 'https://github.com/letsar/flutter_slidable',
+        author: 'Romain Rastel',
+      },
+      usage: '列表项左右滑出操作、满滑删除。',
+      improvement: '满滑与删除拆成两段阈值；ThemeExtension；与竖直 FastRefresh 共存时刷新中锁模。不移植旧通知 API。',
+    },
+    en: {
+      source: {
+        name: 'flutter_slidable',
+        url: 'https://github.com/letsar/flutter_slidable',
+        author: 'Romain Rastel',
+      },
+      usage: 'Swipe rows to reveal actions or dismiss.',
+      improvement: 'Full swipe and dismiss are separate thresholds; ThemeExtension; locks while a vertical FastRefresh is active. No legacy notification API.',
+    },
+  },
 }
 
 export function getCredit(

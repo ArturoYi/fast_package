@@ -34,6 +34,8 @@
     ·
     <a href="https://arturoyi.github.io/fast_package/en/">English</a>
     ·
+    <a href="https://arturoyi.github.io/fast_package/example/">在线演示</a>
+    ·
     <a href="https://github.com/ArturoYi/fast_package/issues">Issues</a>
   </strong>
 </p>
@@ -65,7 +67,7 @@
 | **功能规划** | 继续补齐高频工具与轻量 UI 能力；优先保证现有 API 稳定，再考虑扩展。 |
 | **核心实现** | 业务逻辑与公共 API **尽量手写**，保持可读、可审查、行为可预期。 |
 | **AI 的使用** | AI 主要用于**文档编写、示例整理与测试辅助**；不替代核心设计与关键路径的实现与评审。 |
-| **文档** | 安装、API 与示例以 **[在线文档](https://arturoyi.github.io/fast_package/)** 为准，README 只做项目说明。 |
+| **文档** | 安装、API 与示例以 **[在线文档](https://arturoyi.github.io/fast_package/)** 为准；**[在线演示](https://arturoyi.github.io/fast_package/example/)** 由 GitHub Actions 随文档一并发布。README 只做项目说明。 |
 
 ---
 

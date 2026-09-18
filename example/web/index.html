@@ -17,22 +17,308 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Fast Package Flutter example gallery">
+  <meta name="theme-color" content="#0B0B12">
+  <meta name="color-scheme" content="dark">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Fast Package">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" href="logo.svg">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/svg+xml" href="logo.svg"/>
 
   <title>Fast Package Example</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --fp-splash-bg: #0b0b12;
+      --fp-splash-fg: #f4f1ff;
+      --fp-splash-muted: #9b95b3;
+      --fp-splash-track: #262233;
+      --fp-splash-cyan: #41d1ff;
+      --fp-splash-violet: #bd34fe;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--fp-splash-bg);
+      color-scheme: dark;
+    }
+
+    #flutter-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse at 50% 28%, rgba(189, 52, 254, 0.2), transparent 52%),
+        radial-gradient(ellipse at 82% 86%, rgba(65, 209, 255, 0.1), transparent 42%),
+        var(--fp-splash-bg);
+      color: var(--fp-splash-fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 320ms ease, visibility 320ms ease;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #flutter-splash.is-done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .fp-splash__card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: min(280px, calc(100vw - 48px));
+    }
+
+    .fp-splash__mark {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      display: grid;
+      place-items: center;
+    }
+
+    .fp-splash__ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 180deg,
+        transparent 0 18%,
+        var(--fp-splash-cyan) 42%,
+        var(--fp-splash-violet) 78%,
+        transparent 100%
+      );
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      animation: fp-splash-spin 1.1s linear infinite;
+    }
+
+    .fp-splash__logo {
+      width: 52px;
+      height: 36px;
+    }
+
+    .fp-splash__title,
+    .fp-splash__status {
+      -webkit-font-smoothing: antialiased;
+      font-synthesis: none;
+    }
+
+    .fp-splash__title {
+      margin: 22px 0 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .fp-splash__status {
+      margin: 8px 0 0;
+      min-height: 1.2em;
+      color: var(--fp-splash-muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .fp-splash__track {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 3px;
+      margin-top: 22px;
+      border-radius: 999px;
+      background: var(--fp-splash-track);
+    }
+
+    .fp-splash__bar {
+      width: 16%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--fp-splash-cyan), var(--fp-splash-violet));
+      transition: width 420ms ease;
+    }
+
+    .fp-splash__bar.is-indeterminate {
+      width: 100%;
+      background:
+        linear-gradient(
+          90deg,
+          transparent 0%,
+          var(--fp-splash-cyan) 35%,
+          var(--fp-splash-violet) 65%,
+          transparent 100%
+        );
+      background-size: 42% 100%;
+      background-repeat: no-repeat;
+      animation: fp-splash-shimmer 1.4s ease-in-out infinite;
+    }
+
+    @keyframes fp-splash-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fp-splash-shimmer {
+      0% { background-position: -40% 0; }
+      100% { background-position: 140% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fp-splash__ring,
+      .fp-splash__bar,
+      #flutter-splash {
+        animation: none;
+        transition: none;
+      }
+
+      .fp-splash__bar.is-indeterminate {
+        width: 52%;
+        transform: none;
+      }
+    }
+  </style>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <!--
+    HTML splash must live here: Flutter/Dart cannot run until the web
+    entrypoint and engine are ready. Hide it only after the first frame.
+  -->
+  <div id="flutter-splash" role="status" aria-live="polite" aria-busy="true">
+    <div class="fp-splash__card">
+      <div class="fp-splash__mark" aria-hidden="true">
+        <div class="fp-splash__ring"></div>
+        <svg class="fp-splash__logo" xmlns="http://www.w3.org/2000/svg" viewBox="26 26 76 52">
+          <defs>
+            <linearGradient id="fp-splash-grad" x1="18" y1="78" x2="110" y2="18" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#41D1FF"/>
+              <stop offset="1" stop-color="#BD34FE"/>
+            </linearGradient>
+            <linearGradient id="fp-splash-accent" x1="64" y1="32" x2="112" y2="78" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0175C2"/>
+              <stop offset="1" stop-color="#7C4DFF"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#fp-splash-grad)" d="M26 76V26h46l-6 18H42v14h20l-6 18H26z"/>
+          <path fill="url(#fp-splash-accent)" d="M68 42 102 26 82 78 68 58V42z"/>
+        </svg>
+      </div>
+      <p class="fp-splash__title">Fast Package</p>
+      <p class="fp-splash__status" id="flutter-splash-status">Loading</p>
+      <div class="fp-splash__track">
+        <div class="fp-splash__bar is-indeterminate" id="flutter-splash-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+
+    (function () {
+      const splash = document.getElementById('flutter-splash');
+      const bar = document.getElementById('flutter-splash-bar');
+      const status = document.getElementById('flutter-splash-status');
+      let hidden = false;
+      let firstFrameSeen = false;
+      let runAppFinished = false;
+
+      function setPhase(label, percent) {
+        if (status) {
+          status.textContent = label;
+        }
+        if (!bar) {
+          return;
+        }
+        const determinate = typeof percent === 'number';
+        bar.classList.toggle('is-indeterminate', !determinate);
+        if (determinate) {
+          bar.style.width = Math.max(0, Math.min(percent, 99)) + '%';
+        } else {
+          bar.style.width = '';
+        }
+      }
+
+      function hideSplash() {
+        if (hidden || !splash) {
+          return;
+        }
+        hidden = true;
+        if (bar) {
+          bar.classList.remove('is-indeterminate');
+          bar.style.width = '100%';
+        }
+        splash.classList.add('is-done');
+        splash.setAttribute('aria-busy', 'false');
+        const remove = function () {
+          splash.remove();
+        };
+        splash.addEventListener('transitionend', remove, { once: true });
+        window.setTimeout(remove, 500);
+      }
+
+      function revealWhenPainted() {
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(hideSplash);
+        });
+      }
+
+      function maybeReveal() {
+        if (firstFrameSeen && runAppFinished) {
+          revealWhenPainted();
+        }
+      }
+
+      // Download progress of main.dart.js is not a usable "app ready"
+      // signal: parse + engine init can continue long after 100%.
+      // Keep an indeterminate motion until Flutter paints its first frame.
+      window.addEventListener('flutter-first-frame', function () {
+        firstFrameSeen = true;
+        setPhase('Ready', 99);
+        maybeReveal();
+      }, { once: true });
+
+      if (typeof _flutter === 'undefined' || !_flutter.loader) {
+        setPhase('Failed to start');
+        return;
+      }
+
+      setPhase('Loading');
+      _flutter.loader.load({
+        onEntrypointLoaded: async function (engineInitializer) {
+          try {
+            setPhase('Initializing engine', 46);
+            const appRunner = await engineInitializer.initializeEngine();
+            setPhase('Starting app', 72);
+            await appRunner.runApp();
+            runAppFinished = true;
+            setPhase('Rendering', 88);
+            maybeReveal();
+            // If the first-frame event never arrives, do not keep the
+            // overlay forever after the app has been asked to run.
+            window.setTimeout(function () {
+              if (!hidden) {
+                hideSplash();
+              }
+            }, 15000);
+          } catch (error) {
+            setPhase('Failed to start');
+            throw error;
+          }
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
