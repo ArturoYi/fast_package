@@ -16,11 +16,10 @@ import '../animation/fast_animated_list_transition.dart';
 /// 1. 传给 [resolve] 的可选覆盖
 /// 2. 通过 [of] / [resolve] 读取的 [ThemeData] 扩展
 /// 3. 按 [ThemeData.brightness] 回退到 [light] 或 [dark]
-class FastAnimatedCompositeListTheme
-    extends ThemeExtension<FastAnimatedCompositeListTheme> {
+class FastAnimatedListTheme extends ThemeExtension<FastAnimatedListTheme> {
   /// Creates a list theme.
   /// 创建列表主题。
-  const FastAnimatedCompositeListTheme({
+  const FastAnimatedListTheme({
     required this.insertDuration,
     required this.removeDuration,
     required this.reorderDuration,
@@ -80,8 +79,7 @@ class FastAnimatedCompositeListTheme
 
   /// Default light-mode theme.
   /// 亮色默认主题。
-  static const FastAnimatedCompositeListTheme light =
-      FastAnimatedCompositeListTheme(
+  static const FastAnimatedListTheme light = FastAnimatedListTheme(
     insertDuration: Duration(milliseconds: 225),
     removeDuration: Duration(milliseconds: 225),
     reorderDuration: Duration(milliseconds: 180),
@@ -97,17 +95,17 @@ class FastAnimatedCompositeListTheme
 
   /// Default dark-mode theme.
   /// 暗色默认主题。
-  static const FastAnimatedCompositeListTheme dark = light;
+  static const FastAnimatedListTheme dark = light;
 
   /// Returns the extension from [context], or `null`.
   /// 从 [context] 读取扩展；不存在时为 `null`。
-  static FastAnimatedCompositeListTheme? of(BuildContext context) {
-    return Theme.of(context).extension<FastAnimatedCompositeListTheme>();
+  static FastAnimatedListTheme? of(BuildContext context) {
+    return Theme.of(context).extension<FastAnimatedListTheme>();
   }
 
   /// Resolves the effective theme for [context].
   /// 解析 [context] 下的有效主题。
-  static FastAnimatedCompositeListTheme resolve(
+  static FastAnimatedListTheme resolve(
     BuildContext context, {
     Duration? insertDuration,
     Duration? removeDuration,
@@ -122,7 +120,7 @@ class FastAnimatedCompositeListTheme
     double? autoScrollEdge,
   }) {
     final ThemeData theme = Theme.of(context);
-    final FastAnimatedCompositeListTheme resolved =
+    final FastAnimatedListTheme resolved =
         of(context) ?? (theme.brightness == Brightness.dark ? dark : light);
 
     if (insertDuration == null &&
@@ -155,7 +153,7 @@ class FastAnimatedCompositeListTheme
   }
 
   @override
-  FastAnimatedCompositeListTheme copyWith({
+  FastAnimatedListTheme copyWith({
     Duration? insertDuration,
     Duration? removeDuration,
     Duration? reorderDuration,
@@ -168,7 +166,7 @@ class FastAnimatedCompositeListTheme
     Duration? longPressDuration,
     double? autoScrollEdge,
   }) {
-    return FastAnimatedCompositeListTheme(
+    return FastAnimatedListTheme(
       insertDuration: insertDuration ?? this.insertDuration,
       removeDuration: removeDuration ?? this.removeDuration,
       reorderDuration: reorderDuration ?? this.reorderDuration,
@@ -184,14 +182,14 @@ class FastAnimatedCompositeListTheme
   }
 
   @override
-  FastAnimatedCompositeListTheme lerp(
-    FastAnimatedCompositeListTheme? other,
+  FastAnimatedListTheme lerp(
+    FastAnimatedListTheme? other,
     double t,
   ) {
     if (other == null) {
       return this;
     }
-    return FastAnimatedCompositeListTheme(
+    return FastAnimatedListTheme(
       insertDuration: t < 0.5 ? insertDuration : other.insertDuration,
       removeDuration: t < 0.5 ? removeDuration : other.removeDuration,
       reorderDuration: t < 0.5 ? reorderDuration : other.reorderDuration,
@@ -211,7 +209,7 @@ class FastAnimatedCompositeListTheme
     if (identical(this, other)) {
       return true;
     }
-    return other is FastAnimatedCompositeListTheme &&
+    return other is FastAnimatedListTheme &&
         other.insertDuration == insertDuration &&
         other.removeDuration == removeDuration &&
         other.reorderDuration == reorderDuration &&

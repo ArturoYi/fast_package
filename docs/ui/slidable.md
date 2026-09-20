@@ -20,10 +20,10 @@ outline: [2, 3]
 | 主入口 | `FastSlidable(startPane, endPane, child)` |
 | 操作区 | `FastSlidablePane` + `FastSlidableAction` |
 | 动画 | `FastSlidableMotion.behind / drawer / scroll` |
-| 删除 | `FastSlidableDismiss`；满滑用 `FastSlidableFullSwipe` |
+| 删除 | `FastSlidableDismiss`；滑到底用 `FastSlidableFullSwipe` |
 | 组互斥 | `FastSlidableGroup` + `groupTag` |
 | 主题 | `FastSlidableTheme`（`ThemeExtension`） |
-| **不做** | 旧通知迁移层、从 child 推断按钮、水平 Refresh 与水平 Slidable 同轴共存、侵入 `FastPagingList` API |
+| **不做** | 旧通知迁移层、从 child 推断按钮、水平 Refresh 与水平 Slidable 同一方向共存、写进 `FastPagingList` 的 API |
 
 ::: tip
 配置了 `dismiss` 或会删除的 `fullSwipe` 时，必须给 `FastSlidable` 设 `key`。完整演示见 example 的 `SlidableExample` 页。
@@ -102,14 +102,14 @@ FastSlidableGroup(
 
 ---
 
-## 满滑与删除 {#dismiss}
+## 滑到底与删除 {#dismiss}
 
 两段阈值：
 
 1. 松手在 `extentRatio` 内：按 `openThreshold` / `closeThreshold` 决定展开或收回
-2. 拖过 `fullSwipe.threshold`：主操作铺满；松手触发该操作。`dismiss: true` 时再缩行
+2. 拖过 `fullSwipe.threshold`：主操作铺满整行；松手触发该操作。`dismiss: true` 时再缩行
 
-只想「滑够远就删」、不要满滑铺满时，只设 `FastSlidableDismiss`。
+只想「滑够远就删」、不要滑到底后主操作铺满时，只设 `FastSlidableDismiss`。
 
 主操作默认：起始侧第一个、末侧最后一个；可用 `fullSwipe.primaryIndex` 覆盖。
 
@@ -158,9 +158,9 @@ class _TileState extends State<_Tile> with SingleTickerProviderStateMixin {
 - Slidable 只注册自己那根轴的拖动手势
 - 列表滚动时 `closeOnScroll`（默认 true）会关闭已打开的行
 - `userOffsetNotifier == true` 或 Header / Footer 不是 `inactive` 时锁住滑动并关闭当前行
-- **同轴不做**：水平 Refresh + 水平 Slidable 不保证手势仲裁
+- **同一方向不做**：水平 Refresh + 水平 Slidable 不保证手势仲裁
 
-不要把 Slidable 焊进 `FastPagingList` 的 API，在 `itemBuilder` 里组合即可。
+不要把 Slidable 写进 `FastPagingList` 的 API，在 `itemBuilder` 里组合即可。
 
 ---
 

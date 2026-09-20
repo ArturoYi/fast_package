@@ -1,24 +1,29 @@
 import 'package:flutter/widgets.dart';
 
+import '../animation/fast_animated_list_transition.dart';
 import '../animation/fast_list_stagger.dart';
-import '../controller/fast_animated_composite_list_controller.dart';
+import '../controller/fast_animated_list_controller.dart';
 import '../drag/fast_list_drag_coordinator.dart';
-import 'fast_animated_composite_core.dart';
+import 'fast_list_core.dart';
+import 'fast_animated_list.dart';
 
-/// Drag-to-reorder list without insert / remove animation.
-/// 只做拖拽排序、不做增删动画的列表。
-class FastReorderableList<T> extends StatelessWidget {
-  /// Creates a reorderable list.
-  /// 创建可排序列表。
-  const FastReorderableList({
+/// Insert / remove animation plus drag reorder.
+/// 增删动画 + 拖拽排序入口。
+class FastAnimatedReorderableList<T> extends StatelessWidget {
+  /// Creates an animated reorderable list.
+  /// 创建可排序动画列表。
+  const FastAnimatedReorderableList({
     super.key,
     required this.items,
     required this.itemId,
     required this.itemBuilder,
     required this.onReorder,
     this.controller,
+    this.stagger,
+    this.entrance,
     this.dragTrigger = FastListDragTrigger.longPress,
     this.proxyBuilder,
+    this.transitionBuilder,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
@@ -31,13 +36,17 @@ class FastReorderableList<T> extends StatelessWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.itemExtent,
+    this.insertDuration,
+    this.removeDuration,
     this.reorderDuration,
+    this.slideOffset,
+    this.animationBudget,
     this.dragEnabled = true,
   }) : gridDelegate = null;
 
-  /// Creates a reorderable grid.
-  /// 创建可排序网格。
-  const FastReorderableList.grid({
+  /// Creates an animated reorderable grid.
+  /// 创建可排序动画网格。
+  const FastAnimatedReorderableList.grid({
     super.key,
     required this.items,
     required this.itemId,
@@ -45,8 +54,11 @@ class FastReorderableList<T> extends StatelessWidget {
     required this.onReorder,
     required this.gridDelegate,
     this.controller,
+    this.stagger,
+    this.entrance,
     this.dragTrigger = FastListDragTrigger.longPress,
     this.proxyBuilder,
+    this.transitionBuilder,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.scrollController,
@@ -58,7 +70,11 @@ class FastReorderableList<T> extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.insertDuration,
+    this.removeDuration,
     this.reorderDuration,
+    this.slideOffset,
+    this.animationBudget,
     this.dragEnabled = true,
   }) : itemExtent = null;
 
@@ -78,9 +94,17 @@ class FastReorderableList<T> extends StatelessWidget {
   /// 对齐 Flutter 的排序回调（`oldIndex < newIndex` 时先 `newIndex -= 1`）。
   final ReorderCallback onReorder;
 
-  /// Optional observer.
-  /// 可选观察者。
-  final FastAnimatedCompositeListController? controller;
+  /// Optional observer. Caller disposes an external instance.
+  /// 可选观察者。外部实例由调用方 dispose。
+  final FastAnimatedListController? controller;
+
+  /// First-frame and batch-insert stagger.
+  /// 首屏与批量插入错开。
+  final FastListStagger? stagger;
+
+  /// Entrance recipe.
+  /// 入场配方。
+  final FastListEntrance? entrance;
 
   /// How a drag starts.
   /// 拖拽如何开始。
@@ -89,6 +113,10 @@ class FastReorderableList<T> extends StatelessWidget {
   /// Overlay proxy wrapper.
   /// 拖拽代理包装。
   final FastListProxyBuilder<T>? proxyBuilder;
+
+  /// Custom insert / remove transition.
+  /// 自定义增删过渡。
+  final FastListTransitionBuilder? transitionBuilder;
 
   /// Grid delegate. Null for a list.
   /// 网格代理。
@@ -142,9 +170,25 @@ class FastReorderableList<T> extends StatelessWidget {
   /// 主轴固定尺寸（仅列表）。
   final double? itemExtent;
 
+  /// Insert duration override.
+  /// 插入时长覆盖。
+  final Duration? insertDuration;
+
+  /// Remove duration override.
+  /// 删除时长覆盖。
+  final Duration? removeDuration;
+
   /// Sibling shift duration override.
   /// 兄弟让位时长覆盖。
   final Duration? reorderDuration;
+
+  /// Slide offset override.
+  /// 滑动位移覆盖。
+  final double? slideOffset;
+
+  /// Animation budget override.
+  /// 动画条数预算覆盖。
+  final int? animationBudget;
 
   /// Whether drag is enabled.
   /// 是否允许拖拽。
@@ -156,14 +200,16 @@ class FastReorderableList<T> extends StatelessWidget {
       items: items,
       itemId: itemId,
       itemBuilder: itemBuilder,
-      animateMutations: false,
+      animateMutations: true,
       enableReorder: true,
       sliver: false,
       onReorder: onReorder,
       controller: controller,
-      stagger: const FastListStagger.none(),
+      stagger: stagger ?? defaultFastListStagger(gridDelegate),
+      entrance: entrance,
       dragTrigger: dragTrigger,
       proxyBuilder: proxyBuilder,
+      transitionBuilder: transitionBuilder,
       gridDelegate: gridDelegate,
       scrollDirection: scrollDirection,
       reverse: reverse,
@@ -177,35 +223,46 @@ class FastReorderableList<T> extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       itemExtent: itemExtent,
+      insertDuration: insertDuration,
+      removeDuration: removeDuration,
       reorderDuration: reorderDuration,
+      slideOffset: slideOffset,
+      animationBudget: animationBudget,
       dragEnabled: dragEnabled,
     );
   }
 }
 
-/// Sliver counterpart of [FastReorderableList].
-/// [FastReorderableList] 的 sliver 版本。
-class FastSliverReorderableList<T> extends StatelessWidget {
-  /// Creates a reorderable sliver list.
-  /// 创建可排序 sliver 列表。
-  const FastSliverReorderableList({
+/// Sliver counterpart of [FastAnimatedReorderableList].
+/// [FastAnimatedReorderableList] 的 sliver 版本。
+class FastSliverAnimatedReorderableList<T> extends StatelessWidget {
+  /// Creates an animated reorderable sliver list.
+  /// 创建可排序动画 sliver 列表。
+  const FastSliverAnimatedReorderableList({
     super.key,
     required this.items,
     required this.itemId,
     required this.itemBuilder,
     required this.onReorder,
     this.controller,
+    this.stagger,
+    this.entrance,
     this.dragTrigger = FastListDragTrigger.longPress,
     this.proxyBuilder,
+    this.transitionBuilder,
     this.padding,
     this.itemExtent,
+    this.insertDuration,
+    this.removeDuration,
     this.reorderDuration,
+    this.slideOffset,
+    this.animationBudget,
     this.dragEnabled = true,
   }) : gridDelegate = null;
 
-  /// Creates a reorderable sliver grid.
-  /// 创建可排序 sliver 网格。
-  const FastSliverReorderableList.grid({
+  /// Creates an animated reorderable sliver grid.
+  /// 创建可排序动画 sliver 网格。
+  const FastSliverAnimatedReorderableList.grid({
     super.key,
     required this.items,
     required this.itemId,
@@ -213,10 +270,17 @@ class FastSliverReorderableList<T> extends StatelessWidget {
     required this.onReorder,
     required this.gridDelegate,
     this.controller,
+    this.stagger,
+    this.entrance,
     this.dragTrigger = FastListDragTrigger.longPress,
     this.proxyBuilder,
+    this.transitionBuilder,
     this.padding,
+    this.insertDuration,
+    this.removeDuration,
     this.reorderDuration,
+    this.slideOffset,
+    this.animationBudget,
     this.dragEnabled = true,
   }) : itemExtent = null;
 
@@ -238,7 +302,15 @@ class FastSliverReorderableList<T> extends StatelessWidget {
 
   /// Optional observer.
   /// 可选观察者。
-  final FastAnimatedCompositeListController? controller;
+  final FastAnimatedListController? controller;
+
+  /// First-frame and batch-insert stagger.
+  /// 首屏与批量插入错开。
+  final FastListStagger? stagger;
+
+  /// Entrance recipe.
+  /// 入场配方。
+  final FastListEntrance? entrance;
 
   /// How a drag starts.
   /// 拖拽如何开始。
@@ -247,6 +319,10 @@ class FastSliverReorderableList<T> extends StatelessWidget {
   /// Overlay proxy wrapper.
   /// 拖拽代理包装。
   final FastListProxyBuilder<T>? proxyBuilder;
+
+  /// Custom insert / remove transition.
+  /// 自定义增删过渡。
+  final FastListTransitionBuilder? transitionBuilder;
 
   /// Grid delegate.
   /// 网格代理。
@@ -260,9 +336,25 @@ class FastSliverReorderableList<T> extends StatelessWidget {
   /// 主轴固定尺寸（仅列表）。
   final double? itemExtent;
 
+  /// Insert duration override.
+  /// 插入时长覆盖。
+  final Duration? insertDuration;
+
+  /// Remove duration override.
+  /// 删除时长覆盖。
+  final Duration? removeDuration;
+
   /// Sibling shift duration override.
   /// 兄弟让位时长覆盖。
   final Duration? reorderDuration;
+
+  /// Slide offset override.
+  /// 滑动位移覆盖。
+  final double? slideOffset;
+
+  /// Animation budget override.
+  /// 动画条数预算覆盖。
+  final int? animationBudget;
 
   /// Whether drag is enabled.
   /// 是否允许拖拽。
@@ -274,18 +366,24 @@ class FastSliverReorderableList<T> extends StatelessWidget {
       items: items,
       itemId: itemId,
       itemBuilder: itemBuilder,
-      animateMutations: false,
+      animateMutations: true,
       enableReorder: true,
       sliver: true,
       onReorder: onReorder,
       controller: controller,
-      stagger: const FastListStagger.none(),
+      stagger: stagger ?? defaultFastListStagger(gridDelegate),
+      entrance: entrance,
       dragTrigger: dragTrigger,
       proxyBuilder: proxyBuilder,
+      transitionBuilder: transitionBuilder,
       gridDelegate: gridDelegate,
       padding: padding,
       itemExtent: itemExtent,
+      insertDuration: insertDuration,
+      removeDuration: removeDuration,
       reorderDuration: reorderDuration,
+      slideOffset: slideOffset,
+      animationBudget: animationBudget,
       dragEnabled: dragEnabled,
     );
   }

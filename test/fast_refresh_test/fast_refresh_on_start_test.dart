@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:fast_package/fast_package.dart';
 import 'package:flutter/material.dart';

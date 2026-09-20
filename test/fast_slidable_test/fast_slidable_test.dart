@@ -142,7 +142,7 @@ void main() {
                     groupTag: 'inbox',
                     endPane: FastSlidablePane(
                       motion: FastSlidableMotion.behind,
-                      children: <Widget>[
+                      children: const <Widget>[
                         FastSlidableAction(
                           onPressed: _noop,
                           backgroundColor: Color(0xFFFE4A49),
@@ -151,7 +151,7 @@ void main() {
                         ),
                       ],
                     ),
-                    child: ListTile(title: Text('A')),
+                    child: const ListTile(title: Text('A')),
                   ),
                 ),
                 SizedBox(
@@ -160,7 +160,7 @@ void main() {
                     groupTag: 'inbox',
                     endPane: FastSlidablePane(
                       motion: FastSlidableMotion.behind,
-                      children: <Widget>[
+                      children: const <Widget>[
                         FastSlidableAction(
                           onPressed: _noop,
                           backgroundColor: Color(0xFFFE4A49),
@@ -169,7 +169,7 @@ void main() {
                         ),
                       ],
                     ),
-                    child: ListTile(title: Text('B')),
+                    child: const ListTile(title: Text('B')),
                   ),
                 ),
               ],
@@ -495,6 +495,57 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await refreshing;
+  });
+
+  testWidgets('vertical scroll under FastRefresh does not rebuild slidable', (
+    WidgetTester tester,
+  ) async {
+    int builds = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: FastRefresh(
+            onRefresh: () async {},
+            onLoad: () async => FastRefreshResult.noMore,
+            child: ListView(
+              children: <Widget>[
+                for (int i = 0; i < 8; i++)
+                  SizedBox(
+                    height: 80,
+                    child: FastSlidable(
+                      endPane: FastSlidablePane(
+                        motion: FastSlidableMotion.behind,
+                        children: const <Widget>[
+                          FastSlidableAction(
+                            onPressed: _noop,
+                            backgroundColor: Color(0xFFFE4A49),
+                            icon: Icons.delete,
+                            label: 'Delete',
+                          ),
+                        ],
+                      ),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          if (i == 0) {
+                            builds += 1;
+                          }
+                          return ListTile(title: Text('Item $i'));
+                        },
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final int afterSettle = builds;
+
+    await tester.drag(find.byType(ListView), const Offset(0, 80));
+    await tester.pump();
+    expect(builds, afterSettle);
   });
 
   testWidgets('replacing an external controller does not dispose the old one', (

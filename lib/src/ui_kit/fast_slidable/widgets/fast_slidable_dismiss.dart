@@ -47,10 +47,10 @@ class FastSlidableDismiss {
 }
 
 /// iOS Mail-style full swipe: past [threshold] the primary action expands.
-/// iOS 邮件式满滑：超过 [threshold] 后主操作铺满。
+/// 滑到底：超过 [threshold] 后主操作铺满整行。
 class FastSlidableFullSwipe {
   /// Creates a full-swipe configuration.
-  /// 创建满滑配置。
+  /// 创建滑到底配置。
   ///
   /// When [dismiss] is `true`, the pane must also set [FastSlidableDismiss].
   /// [dismiss] 为 `true` 时，操作区还必须设置 [FastSlidableDismiss]。
@@ -62,11 +62,11 @@ class FastSlidableFullSwipe {
   }) : assert(threshold > 0 && threshold < 1);
 
   /// Absolute animation value that starts the full-swipe path.
-  /// 进入满滑路径的绝对动画值。
+  /// 进入滑到底路径的绝对动画值。
   final double threshold;
 
   /// Whether release after a full swipe also shrinks and removes the row.
-  /// 满滑松手后是否同时收缩并移除该行。
+  /// 滑到底松手后是否同时收缩并移除该行。
   final bool dismiss;
 
   /// Primary action index. Default: `0` on start pane, last on end pane.
@@ -74,7 +74,7 @@ class FastSlidableFullSwipe {
   final int? primaryIndex;
 
   /// Extra hook when a full swipe fires. The primary action is still invoked.
-  /// 满滑触发时的额外钩子。仍会调用主操作的 `onPressed`。
+  /// 滑到底触发时的额外钩子。仍会调用主操作的 `onPressed`。
   final VoidCallback? onTriggered;
 }
 

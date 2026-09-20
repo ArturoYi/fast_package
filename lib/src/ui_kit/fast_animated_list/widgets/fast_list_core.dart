@@ -9,10 +9,10 @@ import '../../fast_refresh/fast_refresh.dart';
 import '../animation/fast_animated_list_transition.dart';
 import '../animation/fast_list_diff.dart';
 import '../animation/fast_list_stagger.dart';
-import '../controller/fast_animated_composite_list_controller.dart';
+import '../controller/fast_animated_list_controller.dart';
 import '../drag/fast_list_drag_coordinator.dart';
 import '../drag/fast_list_geometry.dart';
-import '../theme/fast_animated_composite_list_theme.dart';
+import '../theme/fast_animated_list_theme.dart';
 
 /// Builds a row / cell from [item].
 /// 用 [item] 构建一行 / 一格。
@@ -23,7 +23,7 @@ typedef FastListItemBuilder<T> = Widget Function(
 );
 
 /// Identity of [item]. Must be unique and stable.
-/// [item] 的 identity，必须稳定且唯一。
+/// [item] 的 id，必须稳定且唯一。
 typedef FastListItemId<T> = Object Function(T item);
 
 /// Wraps the default insert / remove transition.
@@ -43,8 +43,8 @@ typedef FastListProxyBuilder<T> = Widget Function(
   Widget child,
 );
 
-/// Shared host for animated / reorderable / composite lists.
-/// 增删、拖拽、组合列表的共享宿主。
+/// Shared host for animated / reorderable lists.
+/// 增删、拖拽列表的共享宿主。
 class FastListCore<T> extends StatefulWidget {
   /// Creates the shared host.
   /// 创建共享宿主。
@@ -114,7 +114,7 @@ class FastListCore<T> extends StatefulWidget {
 
   /// Optional observer. Caller disposes an external instance.
   /// 可选观察者。外部实例由调用方 dispose。
-  final FastAnimatedCompositeListController? controller;
+  final FastAnimatedListController? controller;
 
   /// First-frame stagger.
   /// 首屏错开。
@@ -230,20 +230,20 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
   late List<Object> _ids;
   late Map<Object, T> _dataById;
   late AnimationController _staggerController;
+  final Map<Object, double> _insertIntervalBeginById = <Object, double>{};
 
-  FastAnimatedCompositeListController? _ownedController;
+  FastAnimatedListController? _ownedController;
   OverlayEntry? _overlayEntry;
   Ticker? _scrollTicker;
   Timer? _animTimer;
   FastRefreshData? _refresh;
   bool _limitNewItems = false;
-  bool _refreshLocked = false;
   bool _proxyVisible = false;
   Offset _lastGlobal = Offset.zero;
   Offset _grabOffset = Offset.zero;
   double _scrollVelocity = 0;
 
-  FastAnimatedCompositeListController get _effectiveController {
+  FastAnimatedListController get _effectiveController {
     return widget.controller ?? _ownedController!;
   }
 
@@ -253,7 +253,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
   void initState() {
     super.initState();
     if (widget.controller == null) {
-      _ownedController = FastAnimatedCompositeListController();
+      _ownedController = FastAnimatedListController();
     }
     _ids = widget.items.map(widget.itemId).toList();
     debugAssertUniqueItemIds(_ids);
@@ -287,7 +287,6 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     _unbindRefresh();
     _refresh = FastRefresh.maybeOf(context);
     _bindRefresh();
-    _syncRefreshLock();
   }
 
   @override
@@ -295,14 +294,14 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       if (oldWidget.controller == null) {
-        final FastAnimatedCompositeListController? owned = _ownedController;
+        final FastAnimatedListController? owned = _ownedController;
         _ownedController = null;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           owned?.dispose();
         });
       }
       if (widget.controller == null) {
-        _ownedController = FastAnimatedCompositeListController();
+        _ownedController = FastAnimatedListController();
       }
     }
     _syncItems(widget.items);
@@ -322,37 +321,37 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
   }
 
   void _bindRefresh() {
-    _refresh?.userOffsetNotifier.addListener(_syncRefreshLock);
+    _refresh?.userOffsetNotifier.addListener(_cancelDragIfRefreshLocked);
     _refresh?.headerNotifier.addModeChangeListener(_onRefreshMode);
     _refresh?.footerNotifier.addModeChangeListener(_onRefreshMode);
   }
 
   void _unbindRefresh() {
-    _refresh?.userOffsetNotifier.removeListener(_syncRefreshLock);
+    _refresh?.userOffsetNotifier.removeListener(_cancelDragIfRefreshLocked);
     _refresh?.headerNotifier.removeModeChangeListener(_onRefreshMode);
     _refresh?.footerNotifier.removeModeChangeListener(_onRefreshMode);
     _refresh = null;
   }
 
   void _onRefreshMode(FastRefreshMode mode, double offset) {
-    _syncRefreshLock();
+    _cancelDragIfRefreshLocked();
   }
 
-  void _syncRefreshLock() {
+  /// Refresh / load / an in-flight finger should not rebuild tiles.
+  /// 刷新、加载、手指还在时不要整表 setState，只在起拖时读这个状态。
+  bool get _refreshSessionActive {
     final FastRefreshData? data = _refresh;
-    final bool next = data != null &&
-        (data.userOffsetNotifier.value ||
-            data.headerNotifier.mode != FastRefreshMode.inactive ||
-            data.footerNotifier.mode != FastRefreshMode.inactive);
-    if (next == _refreshLocked) {
-      return;
+    if (data == null) {
+      return false;
     }
-    _refreshLocked = next;
-    if (next && _drag.isDragging) {
+    return data.userOffsetNotifier.value ||
+        data.headerNotifier.mode != FastRefreshMode.inactive ||
+        data.footerNotifier.mode != FastRefreshMode.inactive;
+  }
+
+  void _cancelDragIfRefreshLocked() {
+    if (_drag.isDragging && _refreshSessionActive) {
       _endDrag(cancel: true);
-    }
-    if (mounted) {
-      setState(() {});
     }
   }
 
@@ -376,7 +375,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
       _endDrag(cancel: true);
     }
 
-    final FastAnimatedCompositeListTheme theme = _themeOf();
+    final FastAnimatedListTheme theme = _themeOf();
     if (!widget.animateMutations) {
       _snapTo(newIds, newData);
       return;
@@ -392,6 +391,10 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     }
 
     Duration maxDuration = Duration.zero;
+    int insertOrdinal = 0;
+    // 上拉加载 / 惯性滑动时的尾部追加不要走 SizeTransition：每帧改
+    // maxScrollExtent 会让 FastRefresh 反复 goBallistic，列表会卡。
+    final bool snapTailAppend = diff.isTailAppend && _shouldSnapTailAppend;
     for (final FastListOp op in diff.ops) {
       switch (op) {
         case FastListRemoveOp(:final int index):
@@ -406,11 +409,25 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
             _dataById[id] = item;
           }
           _ids.insert(index, id);
-          final Duration duration =
-              widget.insertDuration ?? theme.insertDuration;
-          _insertItem(index, duration);
-          if (duration > maxDuration) {
-            maxDuration = duration;
+          if (snapTailAppend) {
+            _insertIntervalBeginById.remove(id);
+            _insertItem(index, Duration.zero);
+          } else {
+            final Duration base = widget.insertDuration ?? theme.insertDuration;
+            final Duration duration =
+                widget.stagger.mutationDurationFor(insertOrdinal, base);
+            final double intervalBegin =
+                widget.stagger.mutationIntervalBegin(insertOrdinal, base);
+            if (intervalBegin > 0) {
+              _insertIntervalBeginById[id] = intervalBegin;
+            } else {
+              _insertIntervalBeginById.remove(id);
+            }
+            insertOrdinal++;
+            _insertItem(index, duration);
+            if (duration > maxDuration) {
+              maxDuration = duration;
+            }
           }
         case FastListMoveOp(:final int from, :final int to):
           _applyMove(from, to);
@@ -420,8 +437,8 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     _markAnimating(maxDuration);
   }
 
-  FastAnimatedCompositeListTheme _themeOf() {
-    return FastAnimatedCompositeListTheme.resolve(
+  FastAnimatedListTheme _themeOf() {
+    return FastAnimatedListTheme.resolve(
       context,
       insertDuration: widget.insertDuration,
       removeDuration: widget.removeDuration,
@@ -433,6 +450,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
   }
 
   void _snapTo(List<Object> newIds, Map<Object, T> newData) {
+    _insertIntervalBeginById.clear();
     for (int i = _ids.length - 1; i >= 0; i--) {
       _removeItem(
         i,
@@ -558,7 +576,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     required Animation<double> animation,
     required bool interactive,
   }) {
-    final FastAnimatedCompositeListTheme theme = _themeOf();
+    final FastAnimatedListTheme theme = _themeOf();
     final FastListEntrance entrance = widget.entrance ?? theme.entrance;
     final double slideOffset = widget.slideOffset ?? theme.slideOffset;
 
@@ -580,6 +598,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
         entrance: entrance,
         curve: interactive ? theme.insertCurve : theme.removeCurve,
         slideOffset: slideOffset,
+        intervalBegin: interactive ? (_insertIntervalBeginById[id] ?? 0) : 0,
         child: child,
       );
     }
@@ -600,11 +619,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
       reorderDuration: widget.reorderDuration ?? theme.reorderDuration,
       dragTrigger: widget.dragTrigger,
       longPressDuration: theme.longPressDuration,
-      canDrag: interactive &&
-          widget.enableReorder &&
-          widget.dragEnabled &&
-          widget.onReorder != null &&
-          !_refreshLocked,
+      canDrag: interactive && _dragConfigured,
       onDragStart: _startDrag,
       onDragUpdate: _updateDrag,
       onDragEnd: _endDrag,
@@ -617,15 +632,26 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     );
   }
 
-  bool get _dragAllowed {
+  bool get _dragConfigured {
     return widget.enableReorder &&
         widget.dragEnabled &&
-        widget.onReorder != null &&
-        !_refreshLocked;
+        widget.onReorder != null;
+  }
+
+  bool get _dragAllowedNow => _dragConfigured && !_refreshSessionActive;
+
+  /// Load-more or an in-flight scroll should keep tail inserts layout-stable.
+  /// 上拉加载或正在滑动时，尾部插入应对齐高度，不要播 SizeTransition。
+  bool get _shouldSnapTailAppend {
+    if (_refreshSessionActive) {
+      return true;
+    }
+    return Scrollable.maybeOf(context)?.position.isScrollingNotifier.value ??
+        false;
   }
 
   void _startDrag(int index, Offset global) {
-    if (!_dragAllowed || _drag.isDragging) {
+    if (!_dragAllowedNow || _drag.isDragging) {
       return;
     }
     if (index < 0 || index >= _ids.length) {
@@ -693,6 +719,14 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     if (!_drag.isDragging) {
       return;
     }
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _endDrag(cancel: cancel);
+        }
+      });
+      return;
+    }
     _scrollTicker?.stop();
     _scrollVelocity = 0;
     final int from = _drag.dragIndex!;
@@ -721,7 +755,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
     if (item == null) {
       return;
     }
-    final FastAnimatedCompositeListTheme theme = _themeOf();
+    final FastAnimatedListTheme theme = _themeOf();
     Widget proxy = widget.itemBuilder(context, item, index);
     if (widget.proxyBuilder != null) {
       proxy = widget.proxyBuilder!(context, item, index, proxy);
@@ -765,7 +799,7 @@ class _FastListCoreState<T> extends State<FastListCore<T>>
         !renderObject.hasSize) {
       return;
     }
-    final FastAnimatedCompositeListTheme theme = _themeOf();
+    final FastAnimatedListTheme theme = _themeOf();
     final Offset local = renderObject.globalToLocal(global);
     final Size size = renderObject.size;
     final double edge = theme.autoScrollEdge;
@@ -935,13 +969,11 @@ class _FastListSlotState extends State<_FastListSlot>
         );
         return _ShiftedBox(
           offset: hidden ? Offset.zero : shift,
-          duration: widget.coordinator.isDragging
+          hidden: hidden,
+          duration: widget.coordinator.isDragging && shift != Offset.zero
               ? widget.reorderDuration
               : Duration.zero,
-          child: Opacity(
-            opacity: hidden ? 0 : 1,
-            child: child,
-          ),
+          child: child!,
         );
       },
       child: widget.child,
@@ -988,31 +1020,112 @@ class _FastListSlotState extends State<_FastListSlot>
       );
     }
 
-    return KeyedSubtree(key: _boxKey, child: child);
+    // Measure the layout slot, not the paint-shifted Transform. Handle mode
+    // used to put _boxKey on KeyedSubtree, whose first RenderObject was the
+    // shift Transform — hover chased siblings and onReorder never fired.
+    // 量布局槽位，不要量让位用的 Transform。手柄模式以前把 _boxKey 挂在
+    // KeyedSubtree 上，第一个 RenderObject 就是位移层，hover 会跟着兄弟跳，
+    // onReorder 发不出来。
+    return _SlotLayoutBox(key: _boxKey, child: child);
   }
 }
 
-class _ShiftedBox extends StatelessWidget {
+/// Render box above the drag-shift transform.
+/// 拖拽让位 Transform 之上的测量盒。
+class _SlotLayoutBox extends StatelessWidget {
+  const _SlotLayoutBox({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.deferToChild,
+      child: child,
+    );
+  }
+}
+
+class _ShiftedBox extends StatefulWidget {
   const _ShiftedBox({
     required this.offset,
+    required this.hidden,
     required this.duration,
     required this.child,
   });
 
   final Offset offset;
+  final bool hidden;
   final Duration duration;
   final Widget child;
 
   @override
+  State<_ShiftedBox> createState() => _ShiftedBoxState();
+}
+
+/// Stable Transform + Opacity so drag-start does not remount the tile.
+/// 外壳类型保持不变，起拖时不要把 tile 卸掉重挂。
+class _ShiftedBoxState extends State<_ShiftedBox>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _controller;
+  Animation<Offset>? _animation;
+  Offset _current = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.offset;
+  }
+
+  @override
+  void didUpdateWidget(covariant _ShiftedBox oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.offset == widget.offset) {
+      return;
+    }
+    if (widget.duration == Duration.zero) {
+      _controller?.stop();
+      _current = widget.offset;
+      return;
+    }
+    final AnimationController controller = _controller ??= AnimationController(
+      vsync: this,
+    );
+    controller
+      ..duration = widget.duration
+      ..stop();
+    _animation?.removeListener(_onTick);
+    _animation = Tween<Offset>(begin: _current, end: widget.offset)
+        .animate(CurvedAnimation(parent: controller, curve: Curves.easeOut))
+      ..addListener(_onTick);
+    controller.forward(from: 0);
+  }
+
+  void _onTick() {
+    final Animation<Offset>? animation = _animation;
+    if (!mounted || animation == null) {
+      return;
+    }
+    setState(() {
+      _current = animation.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    _animation?.removeListener(_onTick);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<Offset>(
-      tween: Tween<Offset>(end: offset),
-      duration: duration,
-      curve: Curves.easeOut,
-      builder: (BuildContext context, Offset value, Widget? child) {
-        return Transform.translate(offset: value, child: child);
-      },
-      child: child,
+    return Transform.translate(
+      offset: _current,
+      child: Opacity(
+        opacity: widget.hidden ? 0 : 1,
+        child: widget.child,
+      ),
     );
   }
 }

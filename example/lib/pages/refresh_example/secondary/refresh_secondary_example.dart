@@ -137,7 +137,7 @@ class _RefreshSecondaryExampleState extends State<RefreshSecondaryExample> {
             if (secondaryForeground) {
               secondaryPage = PopScope(
                 canPop: false,
-                onPopInvoked: (bool didPop) {
+                onPopInvokedWithResult: (bool didPop, Object? result) {
                   if (didPop) {
                     return;
                   }

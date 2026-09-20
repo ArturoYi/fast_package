@@ -1,10 +1,14 @@
 ## 0.0.6
 
-* Added `FastAnimatedList` / `FastReorderableList` / `FastAnimatedCompositeList`: implicit insert/remove, drag reorder, first-frame stagger
+* Added `FastAnimatedList` / `FastReorderableList` / `FastAnimatedReorderableList`: implicit insert/remove, drag reorder, first-frame stagger
 * Shared list ticker for stagger (no per-item `AnimationController`); large diffs snap after `animationBudget`
 * `FastStagger` for Column / custom lists; `FastListDragHandle` for handle-triggered reorder
 * `onReorder` matches `ReorderableListView`; vertical `FastRefresh` locks drag while pulling / processing
-* Added `FastAnimatedCompositeListTheme` (`ThemeExtension`)
+* Added `FastAnimatedListTheme` (`ThemeExtension`)
+* Load-more appends keep scrolling smooth: FastRefresh no longer rebuilds ballistic when new items grow the list back in-range; FastAnimatedList snaps tail inserts while Refresh is active or the list is still moving
+* FastAnimatedList + FastRefresh no longer rebuilds every tile when the finger goes down (`userOffset`); drag lock is checked at drag-start. FastSlidable does the same for swipe lock. Refresh demos return `noMore` after the last page
+* Fixed handle-triggered reorder: hover used the shift `Transform` origin, so `FastListDragHandle` could not change order; the handle now also claims the gesture immediately so the parent `Scrollable` cannot steal a vertical drag
+* Example: Animated List scenes now cover insert/remove (batch), drag, both, Refresh, Slidable, and Refresh+Slidable, each with List / Sliver / Column × list / grid
 * Added `FastSlidable`: swipe to reveal actions, iOS-style full swipe, dismiss-to-delete, programmatic `FastSlidableController`
 * Built-in motions: `behind` / `drawer` / `scroll`; vertical axis supported
 * `FastSlidableGroup` keeps one open row per `groupTag`; `closeOnScroll` closes on list scroll

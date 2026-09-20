@@ -460,11 +460,18 @@ class _FRScrollPhysics extends BouncingScrollPhysics {
         (footerNotifier._mode == FastRefreshMode.secondaryReady ||
             footerNotifier._mode == FastRefreshMode.secondaryOpen);
     bool secondary = hSecondary || fSecondary;
-    if (velocity.abs() >= tolerance.velocity ||
-        ((FastRefreshMode.inactive != headerNotifier.mode ||
+    // 内容变高且已经回到范围内时，不要只因为 Header / Footer 还在
+    // processing 就重建弹簧：上拉加载 push 数据后用户多半在惯性滑，
+    // 强行 goBallistic 会掐断当前 activity，看起来就是掉帧。
+    // 仍越界时才需要按新的 max + overExtent 重瞄回弹。
+    final bool retargetOverscrollAfterExtentChange =
+        (FastRefreshMode.inactive != headerNotifier.mode ||
                 FastRefreshMode.inactive != footerNotifier.mode) &&
             oldMaxScrollExtent != position.maxScrollExtent &&
-            position.maxScrollExtent != 0) ||
+            position.maxScrollExtent != 0 &&
+            position.outOfRange;
+    if (velocity.abs() >= tolerance.velocity ||
+        retargetOverscrollAfterExtentChange ||
         (position.outOfRange || (secondary && oldUserOffset)) &&
             (oldUserOffset ||
                 _headerSimulationCreationState.value.needCreation(hState) ||

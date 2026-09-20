@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 /// Pass an instance into the list; the caller [dispose]s it. If omitted, the
 /// State creates and disposes its own controller.
 /// 传入实例时由调用方 [dispose]；未传入时由 State 自建自毁。
-class FastAnimatedCompositeListController extends ChangeNotifier {
+class FastAnimatedListController extends ChangeNotifier {
   /// Creates a controller.
   /// 创建控制器。
-  FastAnimatedCompositeListController();
+  FastAnimatedListController();
 
   bool _animating = false;
   bool _dragging = false;

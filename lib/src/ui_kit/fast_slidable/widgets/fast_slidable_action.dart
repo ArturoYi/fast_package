@@ -83,7 +83,7 @@ class FastSlidableCustomAction extends StatelessWidget {
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             backgroundColor: backgroundColor,
             disabledForegroundColor:
-                effectiveForeground.withOpacity(0.38),
+                effectiveForeground.withValues(alpha: 0.38),
             foregroundColor: effectiveForeground,
             shape: RoundedRectangleBorder(borderRadius: radius),
             side: BorderSide.none,

@@ -52,4 +52,29 @@ void main() {
     expect(const FastListStagger.synchronized().delayFor(4), Duration.zero);
     expect(const FastListStagger.none().isEnabled, isFalse);
   });
+
+  test('batch insert duration covers delay plus insert duration', () {
+    const FastListStagger stagger = FastListStagger.list(
+      duration: Duration(milliseconds: 225),
+      delay: Duration(milliseconds: 40),
+    );
+    expect(
+      stagger.mutationDurationFor(0, const Duration(milliseconds: 225)),
+      const Duration(milliseconds: 225),
+    );
+    expect(
+      stagger.mutationDurationFor(2, const Duration(milliseconds: 225)),
+      const Duration(milliseconds: 305),
+    );
+  });
+
+  test('batch insert interval starts after the ordinal delay', () {
+    const FastListStagger stagger = FastListStagger.list(
+      delay: Duration(milliseconds: 40),
+    );
+    const Duration insert = Duration(milliseconds: 200);
+    expect(stagger.mutationIntervalBegin(0, insert), 0);
+    expect(stagger.mutationIntervalBegin(2, insert), 80 / 280);
+    expect(const FastListStagger.none().mutationIntervalBegin(3, insert), 0);
+  });
 }

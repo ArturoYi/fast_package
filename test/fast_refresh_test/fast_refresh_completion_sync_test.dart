@@ -108,6 +108,7 @@ void main() {
 
       state.appendItems();
       await tester.pump();
+      final double pixelsAfterAppend = state.scrollController.offset;
 
       state.controller.finishLoad();
       await tester.pump();
@@ -116,6 +117,10 @@ void main() {
       expect(state.footerState, isNotNull);
       expect(state.footerState!.mode, FastRefreshMode.inactive);
       expect(state.footerState!.offset, 0);
+      expect(
+        state.scrollController.offset,
+        closeTo(pixelsAfterAppend, 1),
+      );
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 1));

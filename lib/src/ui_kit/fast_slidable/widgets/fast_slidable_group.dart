@@ -380,8 +380,12 @@ class _FastSlidableScrollCloserState extends State<FastSlidableScrollCloser> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// Disables sliding while an ancestor [FastRefresh] is pulling or processing.
-/// 祖先 [FastRefresh] 正在下拉或处理任务时禁止滑动。
+/// Closes the row while an ancestor [FastRefresh] is pulling or processing.
+/// 祖先 [FastRefresh] 正在下拉或处理任务时关掉当前行。
+///
+/// Does not [State.setState] on finger-down. Gesture widgets stay mounted;
+/// [_FastSlidableGesture] reads [isActive] when a swipe starts.
+/// 手指按下不要 [State.setState]，手势层保持挂载；起滑时再读 [isActive]。
 class FastSlidableRefreshLock extends StatefulWidget {
   /// Creates a refresh lock.
   /// 创建刷新锁。
@@ -389,20 +393,23 @@ class FastSlidableRefreshLock extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
-    required this.builder,
   });
 
   /// Row controller closed when refresh becomes active.
   /// 刷新激活时会关闭的行控制器。
   final FastSlidableController controller;
 
-  /// Child passed to [builder].
-  /// 传给 [builder] 的子组件。
+  /// Locked row.
+  /// 被锁的行。
   final Widget child;
 
-  /// Builds the child with [locked] reflecting refresh activity.
-  /// 用 [locked] 表示刷新是否占用手势。
-  final Widget Function(BuildContext context, bool locked, Widget child) builder;
+  /// Whether the nearest lock is currently blocking a swipe.
+  /// 最近的锁是否正在挡住滑动。
+  static bool isActive(BuildContext context) {
+    final _FastSlidableRefreshLockState? state =
+        context.findAncestorStateOfType<_FastSlidableRefreshLockState>();
+    return state?.isActive ?? false;
+  }
 
   @override
   State<FastSlidableRefreshLock> createState() =>
@@ -413,13 +420,25 @@ class _FastSlidableRefreshLockState extends State<FastSlidableRefreshLock> {
   FastRefreshData? _data;
   bool _locked = false;
 
+  /// Live refresh / load / finger-down session. Not a build input.
+  /// 当前刷新 / 加载 / 按住会话。不作为 build 输入。
+  bool get isActive {
+    final FastRefreshData? data = _data;
+    if (data == null) {
+      return false;
+    }
+    return data.userOffsetNotifier.value ||
+        data.headerNotifier.mode != FastRefreshMode.inactive ||
+        data.footerNotifier.mode != FastRefreshMode.inactive;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _unbind();
     _data = FastRefresh.maybeOf(context);
     _bind();
-    _syncLock();
+    _closeIfActive();
   }
 
   @override
@@ -429,40 +448,30 @@ class _FastSlidableRefreshLockState extends State<FastSlidableRefreshLock> {
   }
 
   void _bind() {
-    _data?.userOffsetNotifier.addListener(_syncLock);
+    _data?.userOffsetNotifier.addListener(_closeIfActive);
     _data?.headerNotifier.addModeChangeListener(_onMode);
     _data?.footerNotifier.addModeChangeListener(_onMode);
   }
 
   void _unbind() {
-    _data?.userOffsetNotifier.removeListener(_syncLock);
+    _data?.userOffsetNotifier.removeListener(_closeIfActive);
     _data?.headerNotifier.removeModeChangeListener(_onMode);
     _data?.footerNotifier.removeModeChangeListener(_onMode);
     _data = null;
   }
 
   void _onMode(FastRefreshMode mode, double offset) {
-    _syncLock();
+    _closeIfActive();
   }
 
-  void _syncLock() {
-    final FastRefreshData? data = _data;
-    final bool next = data != null &&
-        (data.userOffsetNotifier.value ||
-            data.headerNotifier.mode != FastRefreshMode.inactive ||
-            data.footerNotifier.mode != FastRefreshMode.inactive);
+  void _closeIfActive() {
+    final bool next = isActive;
     if (next && !_locked) {
       widget.controller.close();
     }
-    if (next != _locked && mounted) {
-      setState(() {
-        _locked = next;
-      });
-    }
+    _locked = next;
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _locked, widget.child);
-  }
+  Widget build(BuildContext context) => widget.child;
 }

@@ -38,7 +38,7 @@ class FastSlidablePaneData {
   final bool fromStart;
 
   /// Index of the primary action (full swipe).
-  /// 主操作下标（满滑）。
+  /// 主操作下标（`fullSwipe`）。
   final int primaryIndex;
 
   /// Action widgets.
@@ -114,7 +114,7 @@ class FastSlidablePane extends StatefulWidget {
   final FastSlidableDismiss? dismiss;
 
   /// iOS-style full swipe that expands the primary action.
-  /// iOS 式满滑，主操作铺满。
+  /// 滑到底后主操作铺满整行。
   final FastSlidableFullSwipe? fullSwipe;
 
   /// Absolute ratio at which a still / opening gesture opens the pane.

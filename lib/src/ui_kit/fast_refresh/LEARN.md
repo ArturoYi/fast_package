@@ -136,11 +136,11 @@ inactive → drag → armed → ready → processing → processed → done → 
 
 读 `fast_refresh_notifier.dart` 基类。这是最值得精读的文件。建议**只跟垂直 bouncing Header**，按方法读：
 
-1. `_updateOffset`：physics 每帧把像素写成 `offset`
+1. `_updateOffset`：physics 每帧把像素写成 `offset`。指示器 `listenable` 在 layout 期间把 `setState` 延到帧后，避免 `Build scheduled during frame`
 2. `_slightDeviation`：把 `70.01` 吸成 `70`，否则 ready 进不了 processing
 3. `_updateMode`：整张状态表
 4. `_onTask`：跑回调；抛错记 `fail`，不往外抛
-5. `_setMode` → `_scheduleProcessedCompletion` → `done` → `_resetBallistic` 回弹
+5. `_setMode` → `_scheduleProcessedCompletion` → `done` → 仍越界才 `_resetBallistic` 回弹（内容变高且已回范围内则不打断惯性）
 6. `overExtent`：为什么 processing 时列表不会弹回 0
 
 先不要深挖 Header / Footer 的 `_calculateOffset` 和 `animateToOffset`。把 `_updateMode` 在纸上画成状态图，比继续往下读更有用。

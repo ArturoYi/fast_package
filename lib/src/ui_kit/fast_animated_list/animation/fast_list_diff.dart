@@ -111,6 +111,28 @@ class FastListDiff {
   /// Whether anything changed.
   /// 是否有变化。
   bool get isEmpty => !reset && ops.isEmpty;
+
+  /// Contiguous inserts after existing items (load-more / append).
+  /// 现有条目之后的连续插入（上拉加载 / 追加）。
+  ///
+  /// Head inserts stay `false` so first-page and top-insert animations run.
+  /// 头部插入仍为 `false`，首屏和顶部插入继续走动画。
+  bool get isTailAppend {
+    if (reset || ops.isEmpty) {
+      return false;
+    }
+    int? previousIndex;
+    for (final FastListOp op in ops) {
+      if (op is! FastListInsertOp) {
+        return false;
+      }
+      if (previousIndex != null && op.index != previousIndex + 1) {
+        return false;
+      }
+      previousIndex = op.index;
+    }
+    return (ops.first as FastListInsertOp).index > 0;
+  }
 }
 
 /// Identity-based list diff with cheap paths for append / single edit / move.

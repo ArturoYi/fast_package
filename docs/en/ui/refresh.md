@@ -146,6 +146,7 @@ Same order as the example hub:
 - **`FastHeaderLocator` / `FastFooterLocator`**: place the indicator inside the list (`position: locator`). Example: `refresh_example/locator`.
 - **`refreshOnStart`**: trigger refresh after the first frame. Example: `refresh_example/refresh_on_start`.
 - **`FastPaging` / `FastPagingList`**: page / total / empty state wired to refresh and load. `FastPagingList` only needs `fetchPage` + `itemBuilder`. Example: `refresh_example/paging`. See [Paging](#paging).
+- **Load-more and scrolling**: appending a page does not abort an in-range fling. See [Load-more and scrolling](#load-more).
 - **`clamping: true`**: the list does not overscroll; only the indicator moves. Example: `refresh_example/clamping`.
 - **`FastMaterialHeader` / `FastMaterialFooter`**: system-style crescent spinner. Example: `refresh_example/material`. See [Material](#material).
 - **`FastRefreshTheme`**: Classic copy and Material colors via `ThemeExtension`. See [Theme](#theme).
@@ -243,6 +244,30 @@ class _CustomPagingState
 | Locator | Locator slivers are inserted when Header / Footer `position` is `locator` |
 
 See the example app’s `refresh_example/paging` (45 items, 10 per page, empty-state and widget-constructor toggles).
+
+---
+
+## Load-more and scrolling {#load-more}
+
+When the user is still flinging toward the bottom, `onLoad` often pushes the next page in the same window. The hitch is usually not “a few extra rows”. It is **a ballistic scroll whose content height changes every frame**, so the spring is torn down and rebuilt.
+
+The library already does this:
+
+| Optimization | Behavior |
+| --- | --- |
+| Keep in-range inertia | After new items grow `maxScrollExtent` and pixels are back in range, FastRefresh does not `goBallistic` just because the footer is still `processing` |
+| Rebound only if needed | After `processed`, the spring is retargeted only while still overscrolled; an in-range fling keeps its current activity |
+| Hold the scroll offset | When the list grows out of overscroll, the footer offset is cleared and pixels are not pulled back by the spring |
+
+Combined with [Animated List](/en/ui/animated-list#load-more), a **tail append** during load-more or an in-flight scroll snaps with zero duration so a `SizeTransition` cannot rewrite height every frame. Idle batch inserts still stagger. `FastPagingList` (a plain `SliverList`) gets the table above as well, not only the animated list.
+
+The app can still save a frame:
+
+- Use `itemExtent` / `prototypeItem` when row height is fixed
+- Give tiles a stable `ValueKey` / `itemId` so the list does not rebuild from scratch
+- Do not push a huge page in one shot; do not decode images synchronously on the insert frame
+
+The combined recipe is the “Refresh” scene under `animated_list_example`.
 
 ---
 

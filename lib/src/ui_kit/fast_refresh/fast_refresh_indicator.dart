@@ -191,18 +191,22 @@ typedef FastRefreshIndicatorBuilder = Widget Function(
 
 /// 二楼指示器构建器。第三个参数是被包装的原指示器。
 typedef FastRefreshSecondaryIndicatorBuilder = Widget Function(
-    BuildContext context, FastRefreshIndicatorState state, FastRefreshIndicator indicator);
+    BuildContext context,
+    FastRefreshIndicatorState state,
+    FastRefreshIndicator indicator);
 
 /// 在指示器组件外监听快照。
 ///
 /// 把它传给 Header / Footer 的 [FastRefreshIndicator.listenable]，即可在任意位置
 /// 用 [ValueListenableBuilder] 读取 [value]。
-class FastRefreshStateListenable extends ValueListenable<FastRefreshIndicatorState?> {
+class FastRefreshStateListenable
+    extends ValueListenable<FastRefreshIndicatorState?> {
   /// 绑定中的 notifier。
   FastRefreshNotifier? _indicatorNotifier;
 
   /// 外部监听者。
   final List<VoidCallback> _listeners = [];
+  final _DeferredListenerGate _gate = _DeferredListenerGate();
 
   /// 绑定 notifier。已有监听者时会立刻补一次通知。
   void _bind(FastRefreshNotifier indicatorNotifier) {
@@ -232,9 +236,7 @@ class FastRefreshStateListenable extends ValueListenable<FastRefreshIndicatorSta
 
   /// 把 notifier 的变化转发给外部监听者。
   void _onNotify() {
-    for (final listener in _listeners) {
-      listener();
-    }
+    _gate.run(_listeners);
   }
 
   @override

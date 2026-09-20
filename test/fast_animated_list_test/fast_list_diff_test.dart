@@ -1,4 +1,4 @@
-import 'package:fast_package/src/ui_kit/fast_animated_composite_list/animation/fast_list_diff.dart';
+import 'package:fast_package/src/ui_kit/fast_animated_list/animation/fast_list_diff.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,6 +17,39 @@ void main() {
       <Object>['a', 'b', 'c'],
     );
     expect(diff.ops, <FastListOp>[const FastListInsertOp(2, 'c')]);
+    expect(diff.isTailAppend, isTrue);
+  });
+
+  test('batch append is a tail append', () {
+    final FastListDiff diff = differ.compute(
+      <Object>['a', 'b'],
+      <Object>['a', 'b', 'c', 'd', 'e'],
+    );
+    expect(diff.isTailAppend, isTrue);
+  });
+
+  test('head insert is not a tail append', () {
+    final FastListDiff diff = differ.compute(
+      <Object>['b', 'c'],
+      <Object>['a', 'b', 'c'],
+    );
+    expect(diff.isTailAppend, isFalse);
+  });
+
+  test('empty to items is not a tail append', () {
+    final FastListDiff diff = differ.compute(
+      <Object>[],
+      <Object>['a', 'b'],
+    );
+    expect(diff.isTailAppend, isFalse);
+  });
+
+  test('remove is not a tail append', () {
+    final FastListDiff diff = differ.compute(
+      <Object>['a', 'b', 'c'],
+      <Object>['a', 'c'],
+    );
+    expect(diff.isTailAppend, isFalse);
   });
 
   test('single remove uses a descending index', () {

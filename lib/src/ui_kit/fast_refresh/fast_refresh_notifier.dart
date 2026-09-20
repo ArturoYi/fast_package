@@ -8,6 +8,39 @@ typedef CanProcessCallBack = bool Function();
 /// 模式变化监听。参数为新模式与当前偏移。
 typedef ModeChangeListener = void Function(FastRefreshMode mode, double offset);
 
+/// 当前帧是否还在 build / layout / paint。此时 [setState] 会触发
+/// `Build scheduled during frame`。
+bool _refreshInPersistentFrame() {
+  return SchedulerBinding.instance.schedulerPhase ==
+      SchedulerPhase.persistentCallbacks;
+}
+
+/// 把 listener 转发延到帧后，避免指示器在 layout 里 [setState]。
+class _DeferredListenerGate {
+  bool _scheduled = false;
+
+  void run(List<VoidCallback> listeners) {
+    if (_refreshInPersistentFrame()) {
+      if (_scheduled) {
+        return;
+      }
+      _scheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _scheduled = false;
+        _forward(listeners);
+      });
+      return;
+    }
+    _forward(listeners);
+  }
+
+  static void _forward(List<VoidCallback> listeners) {
+    for (final VoidCallback listener in List<VoidCallback>.of(listeners)) {
+      listener();
+    }
+  }
+}
+
 /// Header / Footer 的状态机：偏移、模式切换、任务执行。
 abstract class FastRefreshNotifier extends ChangeNotifier {
   /// 当前指示器配置。
@@ -307,7 +340,8 @@ abstract class FastRefreshNotifier extends ChangeNotifier {
   }
 
   /// 供指示器组件监听的 ValueListenable。
-  ValueListenable<FastRefreshNotifier> listenable() => _IndicatorListenable(this);
+  ValueListenable<FastRefreshNotifier> listenable() =>
+      _IndicatorListenable(this);
 
   /// 任务是否正在执行。
   bool _processing = false;
@@ -623,7 +657,8 @@ abstract class FastRefreshNotifier extends ChangeNotifier {
           HapticFeedback.mediumImpact();
         }
       } else {
-        if (_mode == FastRefreshMode.armed && oldMode != FastRefreshMode.armed) {
+        if (_mode == FastRefreshMode.armed &&
+            oldMode != FastRefreshMode.armed) {
           HapticFeedback.mediumImpact();
         }
       }
@@ -912,10 +947,25 @@ abstract class FastRefreshNotifier extends ChangeNotifier {
     if (offset == 0) {
       _setMode(FastRefreshMode.inactive);
     }
-    // 任务刚结束且已松手：触发列表回弹。
-    if (oldMode == FastRefreshMode.processing && !userOffsetNotifier.value) {
+    // 任务刚结束且已松手：只在仍越界时重瞄回弹。
+    // 上拉加载后列表变高，用户已经回到范围内时不要 goBallistic，
+    // 否则会打断正在滑的惯性。
+    if (oldMode == FastRefreshMode.processing &&
+        !userOffsetNotifier.value &&
+        _shouldResetBallisticAfterProcessed()) {
       _resetBallistic();
     }
+  }
+
+  /// processed 收尾后是否还要重建惯性。范围内的惯性应继续，不要掐断。
+  bool _shouldResetBallisticAfterProcessed() {
+    if (clamping && _offset > 0) {
+      return true;
+    }
+    if (_position == null) {
+      return _offset > 0;
+    }
+    return _position!.outOfRange || _offset > precisionErrorTolerance;
   }
 
   /// Footer 完成后按当前像素重算偏移，避免内容高度变化后指示器悬空。
@@ -982,12 +1032,11 @@ class _IndicatorListenable<T extends FastRefreshNotifier>
 
   /// 外部监听者。
   final List<VoidCallback> _listeners = [];
+  final _DeferredListenerGate _gate = _DeferredListenerGate();
 
-  /// 转发通知。
+  /// 转发通知。layout 期间改到帧后，避免指示器 [setState] 崩帧。
   void _onNotify() {
-    for (final listener in _listeners) {
-      listener();
-    }
+    _gate.run(_listeners);
   }
 
   @override

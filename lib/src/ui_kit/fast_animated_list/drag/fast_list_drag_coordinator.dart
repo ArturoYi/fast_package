@@ -162,9 +162,9 @@ class FastListItemDragScope extends InheritedWidget {
 /// Drag handle for [FastListDragTrigger.handle].
 /// [FastListDragTrigger.handle] 使用的拖拽手柄。
 ///
-/// Uses [ImmediateMultiDragGestureRecognizer] so the handle wins against the
-/// parent [Scrollable], same idea as Flutter's reorder handle.
-/// 用 [ImmediateMultiDragGestureRecognizer] 抢过父级 [Scrollable]，对齐 SDK 手柄。
+/// Accepts the arena on pointer down so the parent [Scrollable] cannot steal a
+/// vertical drag. The overlay proxy is created after slop so a tap is a no-op.
+/// 按下即赢手势竞技场，避免父级 [Scrollable] 抢走纵向拖。过 slop 才出代理，点按不会排序。
 class FastListDragHandle extends StatelessWidget {
   /// Creates a handle.
   /// 创建手柄。
@@ -197,15 +197,22 @@ class FastListDragHandle extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         gestures: enabled
             ? <Type, GestureRecognizerFactory>{
-                ImmediateMultiDragGestureRecognizer:
+                _FastListHandleDragRecognizer:
                     GestureRecognizerFactoryWithHandlers<
-                        ImmediateMultiDragGestureRecognizer>(
-                  () => ImmediateMultiDragGestureRecognizer(debugOwner: this),
-                  (ImmediateMultiDragGestureRecognizer instance) {
-                    instance.onStart = (Offset offset) {
-                      scope.onDragStart(scope.index, offset);
-                      return _FastListHandleDrag(scope: scope);
-                    };
+                        _FastListHandleDragRecognizer>(
+                  () => _FastListHandleDragRecognizer(debugOwner: this),
+                  (_FastListHandleDragRecognizer instance) {
+                    instance
+                      ..onStart = (Offset offset) {
+                        scope.onDragStart(scope.index, offset);
+                      }
+                      ..onUpdate = scope.onDragUpdate
+                      ..onEnd = () {
+                        scope.onDragEnd(false);
+                      }
+                      ..onCancel = () {
+                        scope.onDragEnd(true);
+                      };
                   },
                 ),
               }
@@ -216,23 +223,93 @@ class FastListDragHandle extends StatelessWidget {
   }
 }
 
-class _FastListHandleDrag extends Drag {
-  _FastListHandleDrag({required this.scope});
+/// Immediate-accept drag used only by [FastListDragHandle].
+/// 仅给 [FastListDragHandle] 用的「立刻接受」拖拽识别。
+class _FastListHandleDragRecognizer extends OneSequenceGestureRecognizer {
+  _FastListHandleDragRecognizer({super.debugOwner});
 
-  final FastListItemDragScope scope;
+  /// Called once after the pointer moves past slop.
+  /// 指针走过 slop 后调用一次。
+  ValueChanged<Offset>? onStart;
+
+  /// Pointer moved.
+  /// 指针移动。
+  ValueChanged<Offset>? onUpdate;
+
+  /// Pointer up after a live drag.
+  /// 已开始的拖拽松手。
+  VoidCallback? onEnd;
+
+  /// Arena lost or pointer cancelled.
+  /// 竞技场失败或指针取消。
+  VoidCallback? onCancel;
+
+  Offset? _origin;
+  PointerDeviceKind _kind = PointerDeviceKind.touch;
+  bool _dragging = false;
+
+  double get _slop => computeHitSlop(_kind, gestureSettings);
 
   @override
-  void update(DragUpdateDetails details) {
-    scope.onDragUpdate(details.globalPosition);
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    _kind = event.kind;
+    _origin = event.position;
+    _dragging = false;
+    resolve(GestureDisposition.accepted);
   }
 
   @override
-  void end(DragEndDetails details) {
-    scope.onDragEnd(false);
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent) {
+      if (!_dragging) {
+        final Offset origin = _origin ?? event.position;
+        if ((event.position - origin).distance > _slop) {
+          _dragging = true;
+          onStart?.call(origin);
+          onUpdate?.call(event.position);
+        }
+      } else {
+        onUpdate?.call(event.position);
+      }
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _finish(cancelled: event is PointerCancelEvent);
+      stopTrackingPointer(event.pointer);
+    }
   }
 
   @override
-  void cancel() {
-    scope.onDragEnd(true);
+  void acceptGesture(int pointer) {}
+
+  @override
+  void rejectGesture(int pointer) {
+    _finish(cancelled: true);
+    stopTrackingPointer(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {}
+
+  @override
+  void dispose() {
+    _finish(cancelled: true);
+    super.dispose();
+  }
+
+  @override
+  String get debugDescription => 'fast list drag handle';
+
+  void _finish({required bool cancelled}) {
+    if (!_dragging) {
+      _origin = null;
+      return;
+    }
+    _dragging = false;
+    _origin = null;
+    if (cancelled) {
+      onCancel?.call();
+    } else {
+      onEnd?.call();
+    }
   }
 }

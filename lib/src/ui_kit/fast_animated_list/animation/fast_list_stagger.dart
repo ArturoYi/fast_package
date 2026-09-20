@@ -17,18 +17,16 @@ enum FastListStaggerKind {
   /// 单轴：`position * delay`。
   list,
 
-  /// Dual-axis delay used by the reference staggered-grid formula.
-  /// 参考库网格公式的双轴 delay。
+  /// Dual-axis delay: `(row + col) * delay`.
+  /// 双轴：`(row + col) * delay`。
   grid,
 }
 
-/// Stagger configuration for first-frame entrance.
-/// 首屏入场的错开配置。
+/// Stagger configuration for first-frame entrance and batch inserts.
+/// 首屏入场与批量插入的错开配置。
 ///
-/// Delay math matches flutter_staggered_animations:
-/// list = `position * delay`, grid =
-/// `(position ~/ columnCount + position % columnCount) * delay`.
-/// 错开公式与 flutter_staggered_animations 一致。
+/// 列表：`position * delay`；网格：
+/// `(position ~/ columnCount + position % columnCount) * delay`。
 @immutable
 class FastListStagger {
   /// No stagger. Children appear with their mutation animation only.
@@ -86,12 +84,12 @@ class FastListStagger {
   /// 网格列数。列表 / 同步 / none 时为 1。
   final int columnCount;
 
-  /// Positions above this share the last delay (caps ticker length).
-  /// 超过该 position 的项共用最后一档 delay，避免 ticker 过长。
+  /// Positions above this share the last delay (caps controller length).
+  /// 超过该 position 的项共用最后一档 delay，避免 AnimationController 过长。
   final int maxItems;
 
-  /// Whether a shared ticker should run.
-  /// 是否需要共享 ticker。
+  /// Whether a shared AnimationController should run.
+  /// 是否需要共用的 AnimationController。
   bool get isEnabled => kind != FastListStaggerKind.none;
 
   /// Resolved delay between children.
@@ -105,8 +103,8 @@ class FastListStagger {
         Duration(milliseconds: math.max(1, duration.inMilliseconds ~/ 6));
   }
 
-  /// Start delay for [position], matching the reference package.
-  /// [position] 的起始 delay，与参考库一致。
+  /// Start delay for [position].
+  /// [position] 的起始 delay。
   Duration delayFor(int position) {
     switch (kind) {
       case FastListStaggerKind.none:
@@ -148,6 +146,23 @@ class FastListStagger {
     return (start, end);
   }
 
+  /// AnimatedList duration covering this insert's delay plus [insertDuration].
+  /// 覆盖本条插入 delay 与 [insertDuration] 的 AnimatedList 时长。
+  Duration mutationDurationFor(int ordinal, Duration insertDuration) {
+    return insertDuration + delayFor(ordinal);
+  }
+
+  /// Interval begin in `0..1` so the [ordinal]-th insert in a batch waits first.
+  /// 同一批发插入中第 [ordinal] 条的 Interval 起点，先等 delay 再播。
+  double mutationIntervalBegin(int ordinal, Duration insertDuration) {
+    final Duration delay = delayFor(ordinal);
+    final int totalMs = (insertDuration + delay).inMilliseconds;
+    if (delay <= Duration.zero || totalMs <= 0) {
+      return 0;
+    }
+    return math.min(0.999, delay.inMilliseconds / totalMs);
+  }
+
   int _cappedPosition(int position) {
     if (maxItems <= 0) {
       return 0;
@@ -169,8 +184,8 @@ class FastListStagger {
   int get hashCode => Object.hash(kind, duration, delay, columnCount, maxItems);
 }
 
-/// Inherited stagger clock. One ticker for the whole subtree.
-/// 错开入场的 Inherited 时钟。整棵子树共用一个 ticker。
+/// Inherited stagger clock. One AnimationController for the whole subtree.
+/// 错开入场的 Inherited 时钟。整棵子树共用一个 AnimationController。
 class FastStaggerScope extends InheritedWidget {
   /// Creates a scope.
   /// 创建作用域。

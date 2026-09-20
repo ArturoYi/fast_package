@@ -39,6 +39,7 @@ class FastListMutationTransition extends StatefulWidget {
     required this.entrance,
     required this.curve,
     required this.slideOffset,
+    this.intervalBegin = 0,
     required this.child,
   });
 
@@ -65,6 +66,10 @@ class FastListMutationTransition extends StatefulWidget {
   /// Slide pixels when [entrance] includes slide.
   /// 包含 slide 时的像素位移。
   final double slideOffset;
+
+  /// Start of the visual interval in `0..1`. Used to stagger a batch insert.
+  /// 视觉 Interval 起点（`0..1`），用来错开同一批发插入。
+  final double intervalBegin;
 
   /// Child to transition.
   /// 要过渡的子节点。
@@ -93,7 +98,8 @@ class _FastListMutationTransitionState
     if (oldWidget.animation != widget.animation ||
         oldWidget.curve != widget.curve ||
         oldWidget.axis != widget.axis ||
-        oldWidget.slideOffset != widget.slideOffset) {
+        oldWidget.slideOffset != widget.slideOffset ||
+        oldWidget.intervalBegin != widget.intervalBegin) {
       _curved.dispose();
       _bind();
     }
@@ -106,12 +112,26 @@ class _FastListMutationTransitionState
   }
 
   void _bind() {
-    _curved = CurvedAnimation(parent: widget.animation, curve: widget.curve);
+    _curved = CurvedAnimation(
+      parent: widget.animation,
+      curve: _resolvedCurve(),
+    );
     final Offset begin = widget.axis == Axis.vertical
         ? Offset(0, widget.slideOffset)
         : Offset(widget.slideOffset, 0);
     _slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(_curved);
     _scale = Tween<double>(begin: 0.92, end: 1).animate(_curved);
+  }
+
+  Curve _resolvedCurve() {
+    if (widget.intervalBegin <= 0) {
+      return widget.curve;
+    }
+    return Interval(
+      widget.intervalBegin.clamp(0.0, 0.999),
+      1,
+      curve: widget.curve,
+    );
   }
 
   @override
@@ -252,8 +272,8 @@ class _FastListStaggerSlotState extends State<FastListStaggerSlot> {
   }
 }
 
-/// Hosts a single shared ticker and the scroll-in limiter.
-/// 持有共享 ticker，并在首帧后限制滚入再播。
+/// Hosts a shared AnimationController and skips entrance after the first frame.
+/// 持有共用的 AnimationController，并在首帧后限制滚入再播。
 class FastStagger extends StatefulWidget {
   /// Wraps [child] with a stagger clock.
   /// 给 [child] 套上错开时钟。

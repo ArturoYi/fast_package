@@ -7,8 +7,7 @@ class _PagingListHarness extends StatefulWidget {
     super.key,
     required this.fetchPage,
     this.header,
-    this.refreshOnStart = true,
-  });
+  }) : refreshOnStart = true;
 
   final FastPagingFetch<String> fetchPage;
   final FastRefreshHeader? header;

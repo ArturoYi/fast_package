@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../animation/fast_animated_list_transition.dart';
 import '../animation/fast_list_stagger.dart';
-import '../controller/fast_animated_composite_list_controller.dart';
-import 'fast_animated_composite_core.dart';
+import '../controller/fast_animated_list_controller.dart';
+import 'fast_list_core.dart';
 
 /// Implicit list with insert / remove animation and first-frame stagger.
 /// 隐式列表：增删动画 + 首屏错开入场。
@@ -80,10 +80,10 @@ class FastAnimatedList<T> extends StatelessWidget {
 
   /// Optional observer. Caller disposes an external instance.
   /// 可选观察者。外部实例由调用方 dispose。
-  final FastAnimatedCompositeListController? controller;
+  final FastAnimatedListController? controller;
 
-  /// First-frame stagger. Defaults to list / fixed-column grid.
-  /// 首屏错开。默认列表或固定列网格。
+  /// First-frame and batch-insert stagger. Defaults to list / fixed-column grid.
+  /// 首屏与批量插入错开。默认列表或固定列网格。
   final FastListStagger? stagger;
 
   /// Entrance recipe.
@@ -251,10 +251,10 @@ class FastSliverAnimatedList<T> extends StatelessWidget {
 
   /// Optional observer.
   /// 可选观察者。
-  final FastAnimatedCompositeListController? controller;
+  final FastAnimatedListController? controller;
 
-  /// First-frame stagger.
-  /// 首屏错开。
+  /// First-frame and batch-insert stagger.
+  /// 首屏与批量插入错开。
   final FastListStagger? stagger;
 
   /// Entrance recipe.

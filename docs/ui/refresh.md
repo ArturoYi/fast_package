@@ -166,6 +166,7 @@ Footer 默认 `infiniteOffset = 70`：距底部小于 70 即自动加载，不�
 - **`FastHeaderLocator` / `FastFooterLocator`**：把指示器放进列表内部（`position: locator`）。example 的 `refresh_example/locator`。
 - **`refreshOnStart`**：首帧构建完成后自动触发刷新。example 的 `refresh_example/refresh_on_start`。
 - **`FastPaging` / `FastPagingList`**：页码 / 总数 / 空态接到刷新与加载。`FastPagingList` 只需 `fetchPage` + `itemBuilder`。example 的 `refresh_example/paging`。见 [分页](#paging)。
+- **上拉加载与滚动**：新数据 push 时不打断惯性。见 [上拉加载与滚动](#load-more)。
 - **`clamping: true`**：列表不跟着越界，只有指示器移动。example 的 `refresh_example/clamping`。
 - **`FastMaterialHeader` / `FastMaterialFooter`**：系统月牙转圈。example 的 `refresh_example/material`。见 [Material](#material)。
 - **`FastRefreshTheme`**：Classic 文案与 Material 颜色走 `ThemeExtension`。见 [Theme](#theme)。
@@ -263,6 +264,30 @@ class _CustomPagingState
 | Locator | Header / Footer 的 `position` 为 `locator` 时自动插入 Locator sliver |
 
 完整演示见 example 的 `refresh_example/paging`（45 条、每页 10 条，可切空态和 Widget 构造）。
+
+---
+
+## 上拉加载与滚动 {#load-more}
+
+触底加载时，用户往往还在上滑，`onLoad` 又把新数据 push 进列表。掉帧通常不是「多了几条」，而是**惯性还在滑，列表高度每一帧都在变**，物理层的弹簧被反复掐断重来。
+
+库里已经做了这些：
+
+| 优化 | 行为 |
+| --- | --- |
+| 不打断范围内的惯性 | 新数据把 `maxScrollExtent` 撑高、像素已经回到范围内时，不再只因为 Footer 还在 `processing` 就 `goBallistic` |
+| 结束后按需回弹 | `processed` 收尾只在仍越界时重瞄弹簧；已经滑进新内容则保持当前惯性 |
+| 位置稳住 | 列表变高、离开越界后，Footer offset 清掉，像素不被弹簧拽走 |
+
+和 [Animated List](/ui/animated-list#load-more) 组合时，加载中或列表还在滑的**尾部追加**不做动画、立刻到位，避免 `SizeTransition` 每帧改高度。列表静止时的批量插入仍走错开动画。`FastPagingList`（普通 `SliverList`）也会吃到上表，不只是动画列表。
+
+业务侧还能再减一帧成本：
+
+- 行高固定时用 `itemExtent` / `prototypeItem`
+- tile 用稳定 `ValueKey` / `itemId`，避免整表重建
+- 单页不要一次 push 太多；图片不要在插入当帧同步解码
+
+完整组合见 example 的 `animated_list_example`「配合 Refresh」。
 
 ---
 

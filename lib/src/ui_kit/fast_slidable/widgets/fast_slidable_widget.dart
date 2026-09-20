@@ -12,7 +12,7 @@ import 'fast_slidable_pane.dart';
 ///
 /// When [startPane] or [endPane] sets [FastSlidableDismiss] (or a full swipe
 /// that dismisses), [key] must be non-null so list items stay in sync.
-/// 当 [startPane] / [endPane] 配置了 [FastSlidableDismiss]（或会删除的满滑）时，
+/// 当 [startPane] / [endPane] 配置了 [FastSlidableDismiss]（或会删除的 `fullSwipe`）时，
 /// [key] 必须非空，以免列表项错位。
 class FastSlidable extends StatefulWidget {
   /// Creates a slidable.
@@ -306,31 +306,28 @@ class _FastSlidableState extends State<FastSlidable>
 
     return FastSlidableRefreshLock(
       controller: _controller,
-      builder: (BuildContext context, bool locked, Widget child) {
-        return _FastSlidableGesture(
-          enabled: widget.enabled && !locked,
+      child: _FastSlidableGesture(
+        enabled: widget.enabled,
+        controller: _controller,
+        direction: widget.direction,
+        dragStartBehavior: widget.dragStartBehavior,
+        child: FastSlidableScrollCloser(
           controller: _controller,
-          direction: widget.direction,
-          dragStartBehavior: widget.dragStartBehavior,
-          child: FastSlidableScrollCloser(
+          closeOnScroll: widget.closeOnScroll,
+          child: FastSlidableDismissal(
+            axis: flipAxis(widget.direction),
             controller: _controller,
-            closeOnScroll: widget.closeOnScroll,
-            child: FastSlidableDismissal(
-              axis: flipAxis(widget.direction),
+            child: FastSlidableScope(
               controller: _controller,
-              child: FastSlidableScope(
-                controller: _controller,
-                direction: widget.direction,
-                alignment: _paneAlignment,
-                isStartPane:
-                    _controller.paneType.value == FastSlidablePaneType.start,
-                child: child,
-              ),
+              direction: widget.direction,
+              alignment: _paneAlignment,
+              isStartPane:
+                  _controller.paneType.value == FastSlidablePaneType.start,
+              child: content,
             ),
           ),
-        );
-      },
-      child: content,
+        ),
+      ),
     );
   }
 }
@@ -356,8 +353,9 @@ class _FastSlidableGesture extends StatefulWidget {
 
 class _FastSlidableGestureState extends State<_FastSlidableGesture> {
   double _dragExtent = 0;
-  late Offset _startPosition;
-  late Offset _lastPosition;
+  Offset _startPosition = Offset.zero;
+  Offset _lastPosition = Offset.zero;
+  bool _dragging = false;
 
   bool get _isX => widget.direction == Axis.horizontal;
 
@@ -381,19 +379,36 @@ class _FastSlidableGestureState extends State<_FastSlidableGesture> {
     return _isX ? size.width : size.height;
   }
 
+  bool get _refreshLocked => FastSlidableRefreshLock.isActive(context);
+
   void _onStart(DragStartDetails details) {
+    if (_refreshLocked) {
+      _dragging = false;
+      widget.controller.close();
+      return;
+    }
+    _dragging = true;
     _startPosition = details.localPosition;
     _lastPosition = _startPosition;
     _dragExtent = widget.controller.ratio * _extent;
   }
 
   void _onUpdate(DragUpdateDetails details) {
+    if (!_dragging || _refreshLocked) {
+      _dragging = false;
+      widget.controller.close();
+      return;
+    }
     _dragExtent += details.primaryDelta ?? 0;
     _lastPosition = details.localPosition;
     widget.controller.ratio = _dragExtent / _extent;
   }
 
   void _onEnd(DragEndDetails details) {
+    if (!_dragging) {
+      return;
+    }
+    _dragging = false;
     final Offset delta = _lastPosition - _startPosition;
     final double primary = _isX ? delta.dx : delta.dy;
     final FastSlidableGestureKind kind = primary >= 0
