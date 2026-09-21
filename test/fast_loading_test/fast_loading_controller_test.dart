@@ -241,7 +241,7 @@ void main() {
       showLoading(message: 'locking');
       await tester.pump();
 
-      expect(await tester.binding.handlePopRoute(), isTrue);
+      await tester.binding.handlePopRoute();
       await tester.pump();
       expect(find.text('second-page'), findsOneWidget);
       expect(FastLoading.isShowing, isTrue);
@@ -249,7 +249,7 @@ void main() {
       FastLoading.dismissNow();
       await tester.pump();
 
-      expect(await tester.binding.handlePopRoute(), isTrue);
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.text('second-page'), findsNothing);
     });

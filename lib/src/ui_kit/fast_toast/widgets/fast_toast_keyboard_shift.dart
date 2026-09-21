@@ -125,7 +125,9 @@ class RenderFastToastKeyboardShift extends RenderProxyBox
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translateByDouble(_translation.dx, _translation.dy, 0, 1);
+    transform.multiply(
+      Matrix4.translationValues(_translation.dx, _translation.dy, 0),
+    );
   }
 
   @override

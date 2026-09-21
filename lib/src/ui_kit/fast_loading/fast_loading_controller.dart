@@ -28,7 +28,6 @@ final class FastLoadingController with WidgetsBindingObserver {
   GlobalKey<NavigatorState>? _navigatorKey;
   ModalRoute<dynamic>? _lockedRoute;
   bool _observingBinding = false;
-  final _LoadingPopLock _popLock = _LoadingPopLock();
 
   /// Whether a loading overlay is currently on screen.
   /// 当前是否正在展示 Loading。
@@ -225,7 +224,10 @@ final class FastLoadingController with WidgetsBindingObserver {
     if (next == null) {
       return;
     }
-    next.registerPopEntry(_popLock);
+    // PopEntry 在 3.19（回调字段）和 3.22+（带类型参数的方法）上无法同一份实现。
+    // willPop 回调在声明的 SDK 范围内都能拦住 maybePop。
+    // ignore: deprecated_member_use
+    next.addScopedWillPopCallback(_blockPop);
     _lockedRoute = next;
   }
 
@@ -235,8 +237,11 @@ final class FastLoadingController with WidgetsBindingObserver {
     if (route == null || !route.isActive) {
       return;
     }
-    route.unregisterPopEntry(_popLock);
+    // ignore: deprecated_member_use
+    route.removeScopedWillPopCallback(_blockPop);
   }
+
+  Future<bool> _blockPop() async => false;
 
   void _ensureBindingObserver() {
     if (_observingBinding) {
@@ -267,17 +272,4 @@ final class FastLoadingController with WidgetsBindingObserver {
     _current = null;
     _isShowing = false;
   }
-}
-
-/// Blocks [ModalRoute.popDisposition] while registered on the current route.
-/// 注册到当前路由后，让 [ModalRoute.popDisposition] 变为不可弹出。
-final class _LoadingPopLock implements PopEntry<Object?> {
-  @override
-  final ValueNotifier<bool> canPopNotifier = ValueNotifier<bool>(false);
-
-  @override
-  void onPopInvoked(bool didPop) {}
-
-  @override
-  void onPopInvokedWithResult(bool didPop, Object? result) {}
 }
