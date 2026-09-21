@@ -255,8 +255,9 @@ void main() {
       ),
     );
 
-    final FlutterError error = tester.takeException() as FlutterError;
-    expect(error.message, contains('Key'));
+    final Object? error = tester.takeException();
+    expect(error, isA<FlutterError>());
+    expect('$error', contains('Key'));
   });
 
   testWidgets('full swipe past threshold dismisses the row', (

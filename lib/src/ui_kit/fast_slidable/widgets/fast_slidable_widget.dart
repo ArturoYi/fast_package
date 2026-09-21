@@ -121,7 +121,6 @@ class _FastSlidableState extends State<FastSlidable>
   @override
   void initState() {
     super.initState();
-    _assertDismissKey();
     if (widget.controller == null) {
       _ownedController = FastSlidableController(this);
     }
@@ -140,7 +139,6 @@ class _FastSlidableState extends State<FastSlidable>
   @override
   void didUpdateWidget(covariant FastSlidable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _assertDismissKey();
     if (oldWidget.controller != widget.controller) {
       _reattachController(oldWidget.controller);
     }
@@ -279,6 +277,7 @@ class _FastSlidableState extends State<FastSlidable>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    _assertDismissKey();
     Widget content = SlideTransition(
       position: _moveAnimation,
       child: FastSlidableGroupInteractor(
