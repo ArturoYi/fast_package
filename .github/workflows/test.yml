@@ -24,10 +24,13 @@ jobs:
           flutter-version: '3.19.6'
           channel: 'stable'
 
-      # dart pub get 只解析本包。flutter pub get 会连带 ./example，
-      # 而 example 要求 Dart >= 3.8.0，无法在本 job 的 3.19.6 / Dart 3.3.4 上解析。
+      # pub get 会按约定继续解析 ./example；example 要求 Dart >= 3.8.0，
+      # 与本 job 锁定的 3.19.6 / Dart 3.3.4 冲突。CI 不测 example，先移走再装依赖。
       - name: Install dependencies
-        run: dart pub get
+        run: |
+          mv example "$RUNNER_TEMP/example"
+          flutter pub get
+          mv "$RUNNER_TEMP/example" example
 
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
