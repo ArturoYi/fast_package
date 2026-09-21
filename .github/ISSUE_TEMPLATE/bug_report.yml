@@ -1,0 +1,103 @@
+name: Bug
+description: API 行为不对、组件渲染异常、文档或示例有误
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先搜一下 [已有 Issue](https://github.com/ArturoYi/fast_package/issues)。贡献说明见 [贡献](https://arturoyi.github.io/fast_package/community/contributing.html)。
+        新功能用「功能」模板。别贴密钥、证书或业务数据。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 一句话
+      description: 比如「FastToast 在键盘弹起后没有跟着上移」。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 怎么复现
+      description: 越小越好。写清调用和操作步骤。
+      placeholder: |
+        1. 导入 package:fast_package/fast_package.dart
+        2. 使用 FastXxx …
+        3. 在某某平台操作 …
+        4. 看到 …
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: 最小代码
+      description: 精简后的调用或 Widget。文档问题可写页面路径。
+      render: dart
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 相关模块
+      options:
+        - 防抖 / 节流 / 速率限制
+        - 异步任务队列
+        - 扩展函数
+        - 尺寸计算
+        - Toast
+        - Loading
+        - Shimmer
+        - Refresh
+        - Slidable
+        - Animated List
+        - 渐变边框
+        - Cover 布局
+        - 文档 / 示例
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Fast Package 版本或 commit
+    validations:
+      required: true
+  - type: input
+    id: flutter
+    attributes:
+      label: Flutter / Dart 版本
+      placeholder: "flutter --version"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 平台
+      options:
+        - Android
+        - iOS
+        - Web
+        - macOS
+        - Windows
+        - Linux
+        - 多平台 / 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或截图说明
+      description: 可选。异常栈、断言信息，或描述截图里看到的现象。把图片拖进评论框即可。
+      render: text

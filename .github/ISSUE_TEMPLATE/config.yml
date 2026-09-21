@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 中文文档
+    url: https://arturoyi.github.io/fast_package/
+    about: 安装、API 与示例以文档站为准
+  - name: English docs
+    url: https://arturoyi.github.io/fast_package/en/
+    about: Install, API, and examples
+  - name: 在线演示
+    url: https://arturoyi.github.io/fast_package/example/
+    about: 随文档发布的 Flutter Web Demo
+  - name: pub.dev
+    url: https://pub.dev/packages/fast_package
+    about: 包页面与版本

@@ -1,0 +1,41 @@
+name: 功能
+description: 新工具、扩展、轻量 UI、文档
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        说清楚要解决什么，以及期望的 API 或交互长什么样。
+        优先稳住现有能力，再考虑扩展；尽量不引入第三方依赖。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决什么
+      description: 日常开发里重复出现、或现有模块覆盖不到的痛点。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望长什么样
+      description: API、组件交互，或文档要补的内容。
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 方向
+      options:
+        - 异步控制（防抖 / 节流 / 速率限制 / 队列）
+        - 扩展与工具
+        - UI 组件
+        - 文档或示例
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 现在怎么做
+      description: 可选。本地临时写法，或是否考虑过现有模块。
