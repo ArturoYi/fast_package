@@ -19,6 +19,9 @@ hero:
     - theme: alt
       text: View on GitHub
       link: https://github.com/ArturoYi/fast_package
+    - theme: alt
+      text: pub.dev
+      link: https://pub.dev/packages/fast_package
 
 features:
   - icon: ⚡

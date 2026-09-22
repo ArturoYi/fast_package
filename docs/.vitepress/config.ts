@@ -184,6 +184,7 @@ export default defineConfig({
             activeMatch: '^/(guide|features|ui|community)/',
           },
           { text: 'GitHub', link: 'https://github.com/ArturoYi/fast_package' },
+          { text: 'pub.dev', link: 'https://pub.dev/packages/fast_package' },
         ],
         sidebar: sidebarForPrefixes(docSidebarPrefixesZh, sidebarZhGroups),
         outline: {
@@ -213,6 +214,7 @@ export default defineConfig({
             activeMatch: '^/en/(guide|features|ui|community)/',
           },
           { text: 'GitHub', link: 'https://github.com/ArturoYi/fast_package' },
+          { text: 'pub.dev', link: 'https://pub.dev/packages/fast_package' },
         ],
         sidebar: sidebarForPrefixes(docSidebarPrefixesEn, sidebarEnGroups),
         outline: {

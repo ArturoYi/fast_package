@@ -7,7 +7,7 @@ outline: [2, 3]
 
 ### Installation
 
-Check the latest version before installing. If a new release causes problems, pin the previous version.
+Check the [latest version on pub.dev](https://pub.dev/packages/fast_package) before installing. If a new release causes problems, pin the previous version.
 
 ```yaml
 dependencies:

@@ -7,7 +7,7 @@ outline: [2, 3]
 
 ### 安装
 
-请在安装前检查最新版本。如果新版本有任何问题，请使用以前的版本。
+请在安装前到 [pub.dev](https://pub.dev/packages/fast_package) 查看最新版本。如果新版本有任何问题，请使用以前的版本。
 
 ```yaml
 dependencies:
