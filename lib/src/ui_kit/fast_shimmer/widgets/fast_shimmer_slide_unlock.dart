@@ -163,6 +163,11 @@ class _FastShimmerSlideUnlockState extends State<FastShimmerSlideUnlock>
   /// `0` 为起点，`1` 为解锁终点；同时驱动回弹 / 就位动画。
   late final AnimationController _progress;
 
+  /// True while a finger is dragging. Mutes the beam ticker without
+  /// rebuilding the [GestureDetector].
+  /// 手指拖动中为真。只停掉光束 ticker，不重建 [GestureDetector]。
+  final ValueNotifier<bool> _holdSheen = ValueNotifier<bool>(false);
+
   /// Whether a successful unlock has been committed.
   /// 是否已经完成一次成功解锁。
   bool _unlocked = false;
@@ -188,12 +193,49 @@ class _FastShimmerSlideUnlockState extends State<FastShimmerSlideUnlock>
   @override
   void dispose() {
     _progress.dispose();
+    _holdSheen.dispose();
     super.dispose();
   }
+
+  /// Drag is read at event time so a settle animation does not have to
+  /// rebuild the recognizer to re-enable the next swipe.
+  /// 在事件里读拖动态。回弹动画不必为了恢复下一次滑动而重建手势。
+  bool get _acceptsDrag => widget.enabled && !_unlocked && !_settling;
 
   /// True when reduce-motion is on; settle jumps instead of animating.
   /// 开启「减少动态效果」时为真；就位改为跳变而不是动画。
   bool get _reduceMotion => MediaQuery.of(context).disableAnimations;
+
+  void _onDragStart(DragStartDetails details) {
+    if (!_acceptsDrag) {
+      return;
+    }
+    _holdSheen.value = true;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details, double maxTravel, bool rtl) {
+    if (!_acceptsDrag || maxTravel <= 0) {
+      return;
+    }
+    final double delta = rtl ? -details.delta.dx : details.delta.dx;
+    _progress.value = (_progress.value + delta / maxTravel).clamp(0.0, 1.0);
+  }
+
+  void _handleDragEnd(DragEndDetails _) {
+    _holdSheen.value = false;
+    if (!_acceptsDrag) {
+      return;
+    }
+    _onDragEnd();
+  }
+
+  void _handleDragCancel() {
+    _holdSheen.value = false;
+    if (!_acceptsDrag) {
+      return;
+    }
+    _onDragEnd();
+  }
 
   Future<void> _onDragEnd() async {
     if (_unlocked || _settling) {
@@ -273,8 +315,7 @@ class _FastShimmerSlideUnlockState extends State<FastShimmerSlideUnlock>
           fontWeight: FontWeight.w500,
           letterSpacing: 0.3,
         );
-    final bool area =
-        widget.highlight == FastShimmerSlideUnlockHighlight.area;
+    final bool area = widget.highlight == FastShimmerSlideUnlockHighlight.area;
     // Label colors must be opaque. A translucent white base over white
     // glyphs cancels the beam (the mix stays white).
     // 文字扫光必须用不透明色。半透明白叠在白字形上会把光束抵消掉。
@@ -307,110 +348,87 @@ class _FastShimmerSlideUnlockState extends State<FastShimmerSlideUnlock>
       label: widget.label,
       hint: 'Slide to unlock',
       enabled: widget.enabled && !_unlocked,
-      child: AnimatedBuilder(
-        animation: _progress,
-        builder: (BuildContext context, Widget? child) {
-          return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final double width = constraints.maxWidth;
-              final double maxTravel =
-                  (width - inset * 2 - thumbSize).clamp(0.0, double.infinity);
-              final double travel =
-                  maxTravel * _progress.value.clamp(0.0, 1.0);
-              final double thumbLeft = rtl
-                  ? width - inset - thumbSize - travel
-                  : inset + travel;
-              final bool canDrag =
-                  widget.enabled && !_unlocked && !_settling && maxTravel > 0;
-
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragUpdate: canDrag
-                    ? (DragUpdateDetails details) {
-                        final double delta =
-                            rtl ? -details.delta.dx : details.delta.dx;
-                        _progress.value =
-                            (_progress.value + delta / maxTravel)
-                                .clamp(0.0, 1.0);
-                      }
-                    : null,
-                onHorizontalDragEnd: canDrag
-                    ? (DragEndDetails details) {
-                        _onDragEnd();
-                      }
-                    : null,
-                child: SizedBox(
-                  width: width,
-                  height: widget.height,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      if (!area)
-                        Positioned.fill(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: widget.trackColor ??
-                                  const Color(0xFF3A3A3C),
-                              borderRadius:
-                                  BorderRadius.circular(widget.height / 2),
-                            ),
-                          ),
-                        ),
-                      if (area)
-                        beam(
-                          SizedBox(
-                            width: width,
-                            height: widget.height,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: widget.trackColor ?? Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  widget.height / 2,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        Positioned.fill(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: thumbSize,
-                            ),
-                            child: Center(
-                              child: beam(_buildLabel(labelStyle)),
-                            ),
-                          ),
-                        ),
-                      if (area) Positioned.fill(child: centeredLabel()),
-                      Positioned(
-                        left: thumbLeft,
-                        top: inset,
-                        child: _ThumbDisc(
-                          size: thumbSize,
-                          color: widget.thumbColor,
-                        ),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double width = constraints.maxWidth;
+          final double maxTravel =
+              (width - inset * 2 - thumbSize).clamp(0.0, double.infinity);
+          // Beam stays mounted across drag frames. The thumb is a transform,
+          // same idea as FastSlidable's SlideTransition: pointer moves must
+          // not rebuild the ShaderMask.
+          // 光束在拖动帧之间保持挂载。滑钮只做 transform，和 FastSlidable 的
+          // SlideTransition 一样：手指移动不要重建 ShaderMask。
+          final Widget sheen = area
+              ? beam(
+                  SizedBox(
+                    width: width,
+                    height: widget.height,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: widget.trackColor ?? Colors.white,
+                        borderRadius: BorderRadius.circular(widget.height / 2),
                       ),
-                      Positioned(
-                        left: thumbLeft,
-                        top: inset,
-                        child: SizedBox(
-                          width: thumbSize,
-                          height: thumbSize,
-                          child: _ThumbIcon(
-                            size: thumbSize,
-                            icon: _unlocked
-                                ? (widget.successIcon ?? Icons.check)
-                                : (widget.thumbIcon ?? Icons.chevron_right),
-                            flipX: rtl && !_unlocked,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
+                )
+              : Padding(
+                  padding: EdgeInsets.symmetric(horizontal: thumbSize),
+                  child: Center(child: beam(_buildLabel(labelStyle))),
+                );
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: widget.enabled ? _onDragStart : null,
+            onHorizontalDragUpdate: widget.enabled
+                ? (DragUpdateDetails details) =>
+                    _onDragUpdate(details, maxTravel, rtl)
+                : null,
+            onHorizontalDragEnd: widget.enabled ? _handleDragEnd : null,
+            onHorizontalDragCancel: widget.enabled ? _handleDragCancel : null,
+            child: SizedBox(
+              width: width,
+              height: widget.height,
+              child: Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  if (!area)
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: widget.trackColor ?? const Color(0xFF3A3A3C),
+                          borderRadius:
+                              BorderRadius.circular(widget.height / 2),
+                        ),
+                      ),
+                    ),
+                  Positioned.fill(
+                    child: _SheenGate(
+                      holding: _holdSheen,
+                      child: sheen,
+                    ),
+                  ),
+                  if (area) Positioned.fill(child: centeredLabel()),
+                  Positioned(
+                    left: rtl ? null : inset,
+                    right: rtl ? inset : null,
+                    top: inset,
+                    width: thumbSize,
+                    height: thumbSize,
+                    child: _SlidingThumb(
+                      progress: _progress,
+                      maxTravel: maxTravel,
+                      rtl: rtl,
+                      size: thumbSize,
+                      color: widget.thumbColor,
+                      icon: _unlocked
+                          ? (widget.successIcon ?? Icons.check)
+                          : (widget.thumbIcon ?? Icons.chevron_right),
+                      flipX: rtl && !_unlocked,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
@@ -427,6 +445,75 @@ class _FastShimmerSlideUnlockState extends State<FastShimmerSlideUnlock>
       text,
       textAlign: TextAlign.center,
       style: style.copyWith(color: Colors.white),
+    );
+  }
+}
+
+/// Freezes the beam ticker while a drag is active.
+/// 拖动期间冻结光束 ticker。
+class _SheenGate extends StatelessWidget {
+  const _SheenGate({
+    required this.holding,
+    required this.child,
+  });
+
+  final ValueNotifier<bool> holding;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: holding,
+      builder: (BuildContext context, bool isHolding, Widget? child) {
+        return TickerMode(enabled: !isHolding, child: child!);
+      },
+      child: child,
+    );
+  }
+}
+
+/// Thumb that follows [progress] with a paint-only transform.
+/// 滑钮跟随 [progress]，只用绘制期 transform 移动。
+class _SlidingThumb extends StatelessWidget {
+  const _SlidingThumb({
+    required this.progress,
+    required this.maxTravel,
+    required this.rtl,
+    required this.size,
+    required this.color,
+    required this.icon,
+    required this.flipX,
+  });
+
+  final Animation<double> progress;
+  final double maxTravel;
+  final bool rtl;
+  final double size;
+  final Color color;
+  final IconData icon;
+  final bool flipX;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: progress,
+      builder: (BuildContext context, Widget? child) {
+        final double travel = maxTravel * progress.value.clamp(0.0, 1.0);
+        return Transform.translate(
+          offset: Offset(rtl ? -travel : travel, 0),
+          child: child,
+        );
+      },
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          children: <Widget>[
+            _ThumbDisc(size: size, color: color),
+            _ThumbIcon(size: size, icon: icon, flipX: flipX),
+          ],
+        ),
+      ),
     );
   }
 }

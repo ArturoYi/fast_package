@@ -162,6 +162,16 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
   /// 驱动所有后代 shimmer 高光的共享控制器。
   late AnimationController _controller;
 
+  /// Notifies only when the visible sweep position changes.
+  /// 仅在可见扫光位置变化时通知。
+  ///
+  /// The controller keeps running through [FastShimmerScope.pauseDuration],
+  /// but the gradient stays put. Skipping those ticks avoids a [ShaderMask]
+  /// saveLayer on every frame of the hold.
+  /// 控制器在 [FastShimmerScope.pauseDuration] 期间仍在走，但渐变停住。
+  /// 跳过这些 tick，停顿段就不会每帧做一次 [ShaderMask] saveLayer。
+  final _SweepListenable _sweep = _SweepListenable();
+
   @override
   void initState() {
     super.initState();
@@ -170,14 +180,15 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
     // 立即开始循环；减少动画的处理在 MediaQuery 可用后的
     // didChangeDependencies 中进行。
     _controller = AnimationController(vsync: this, duration: _cycleDuration)
+      ..addListener(_handleControllerTick)
       ..repeat();
   }
 
   /// Sweep + pause. Controller `0`–`1` maps across this whole period.
   /// 扫过 + 停顿。控制器的 `0`–`1` 对应这整段周期。
   Duration get _cycleDuration {
-    final int total = widget.duration.inMicroseconds +
-        widget.pauseDuration.inMicroseconds;
+    final int total =
+        widget.duration.inMicroseconds + widget.pauseDuration.inMicroseconds;
     return Duration(microseconds: total > 0 ? total : 1);
   }
 
@@ -193,13 +204,23 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
     if (oldWidget.duration != widget.duration ||
         oldWidget.pauseDuration != widget.pauseDuration) {
       _controller.duration = _cycleDuration;
+      _handleControllerTick();
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller
+      ..removeListener(_handleControllerTick)
+      ..dispose();
+    _sweep.dispose();
     super.dispose();
+  }
+
+  /// Publishes a new sweep position. Identical values (the pause hold) no-op.
+  /// 发布新的扫光位置。相同值（停顿段）不通知。
+  void _handleControllerTick() {
+    _sweep.update(_sweepProgress(_controller.value));
   }
 
   /// Stops and freezes at mid-cycle when reduce-motion is on; otherwise
@@ -249,12 +270,14 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
     final FastShimmerTheme theme = FastShimmerTheme.resolve(context);
 
     return AnimatedBuilder(
-      animation: _controller,
-      // Cache the skeleton tree so animation ticks do not rebuild it.
-      // 缓存骨架树，避免动画帧触发子树重建。
-      child: widget.child,
+      animation: _sweep,
+      // Cache the skeleton. A repaint boundary keeps its picture when only
+      // the shader moves, so the mask does not re-rasterize the subtree.
+      // 缓存骨架。扫光只改 shader 时，重绘边界留住已光栅化的子树，
+      // 遮罩不必把整棵子树再画一遍。
+      child: RepaintBoundary(child: widget.child),
       builder: (BuildContext context, Widget? child) {
-        final double value = _sweepProgress(_controller.value);
+        final double value = _sweep.value;
 
         final LinearGradient gradient = widget.sweep == FastShimmerSweep.beam
             ? _beamGradient(theme, value)
@@ -336,6 +359,20 @@ class _FastShimmerScopeState extends State<FastShimmerScope>
       }
     }
     return stops;
+  }
+}
+
+/// Sweep position that stays quiet while the value does not change.
+/// 扫光位置；数值不变时不发通知。
+class _SweepListenable extends ChangeNotifier {
+  double value = 0;
+
+  void update(double next) {
+    if (next == value) {
+      return;
+    }
+    value = next;
+    notifyListeners();
   }
 }
 

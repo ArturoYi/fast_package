@@ -300,6 +300,51 @@ void main() {
     expect(dismissed, isTrue);
   });
 
+  testWidgets('full swipe fires on release without a follow-up tap', (
+    WidgetTester tester,
+  ) async {
+    bool triggered = false;
+    await tester.pumpWidget(
+      wrap(
+        FastSlidable(
+          key: const ValueKey<String>('row'),
+          endPane: FastSlidablePane(
+            motion: FastSlidableMotion.scroll,
+            extentRatio: 0.4,
+            dismiss: FastSlidableDismiss(
+              onDismissed: () {},
+            ),
+            fullSwipe: FastSlidableFullSwipe(
+              threshold: 0.5,
+              onTriggered: () => triggered = true,
+            ),
+            children: const <Widget>[
+              FastSlidableAction(
+                onPressed: _noop,
+                backgroundColor: Color(0xFFFE4A49),
+                icon: Icons.delete,
+                label: 'Delete',
+              ),
+            ],
+          ),
+          child: const ListTile(title: Text('Item')),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('Item'));
+    final TestGesture gesture = await tester.startGesture(center);
+    await gesture.moveBy(
+      const Offset(-280, 0),
+      timeStamp: const Duration(milliseconds: 120),
+    );
+    await tester.pump();
+    await gesture.up(timeStamp: const Duration(milliseconds: 160));
+    await tester.pump();
+
+    expect(triggered, isTrue);
+  });
+
   testWidgets('list swipe-dismiss removes a middle row without crashing', (
     WidgetTester tester,
   ) async {
@@ -376,7 +421,8 @@ void main() {
     expect(find.text('Item'), findsOneWidget);
   });
 
-  testWidgets('vertical drag reveals the end pane', (WidgetTester tester) async {
+  testWidgets('vertical drag reveals the end pane',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         FastSlidable(

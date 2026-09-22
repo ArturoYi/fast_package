@@ -1,20 +1,28 @@
 ## 0.0.6
 
-* Added `FastAnimatedList` / `FastReorderableList` / `FastAnimatedReorderableList`: implicit insert/remove, drag reorder, first-frame stagger
-* Shared list ticker for stagger (no per-item `AnimationController`); large diffs snap after `animationBudget`
-* `FastStagger` for Column / custom lists; `FastListDragHandle` for handle-triggered reorder
-* `onReorder` matches `ReorderableListView`; vertical `FastRefresh` locks drag while pulling / processing
+* Added `FastAnimatedList` / `FastSliverAnimatedList`: insert and remove animate from `items` + stable `itemId` (no manual insert/remove calls)
+* Added `FastReorderableList` / `FastSliverReorderableList` and `FastAnimatedReorderableList` / `FastSliverAnimatedReorderableList` when drag reorder is needed alone or together with insert/remove
+* First-frame stagger uses one shared list ticker (no per-item `AnimationController`); diffs larger than `animationBudget` snap into place
+* `FastStagger` covers Column and custom lists (`list` / `grid` / `synchronized` / `none`); later items that scroll into view do not replay the entrance
+* Drag is long-press by default, or `FastListDragTrigger.handle` + `FastListDragHandle`; `onReorder` matches `ReorderableListView`
 * Added `FastAnimatedListTheme` (`ThemeExtension`)
-* Load-more appends keep scrolling smooth: FastRefresh no longer rebuilds ballistic when new items grow the list back in-range; FastAnimatedList snaps tail inserts while Refresh is active or the list is still moving
-* FastAnimatedList + FastRefresh no longer rebuilds every tile when the finger goes down (`userOffset`); drag lock is checked at drag-start. FastSlidable does the same for swipe lock. Refresh demos return `noMore` after the last page
-* Fixed handle-triggered reorder: hover used the shift `Transform` origin, so `FastListDragHandle` could not change order; the handle now also claims the gesture immediately so the parent `Scrollable` cannot steal a vertical drag
-* Example: Animated List scenes now cover insert/remove (batch), drag, both, Refresh, Slidable, and Refresh+Slidable, each with List / Sliver / Column × list / grid
-* Added `FastSlidable`: swipe to reveal actions, iOS-style full swipe, dismiss-to-delete, programmatic `FastSlidableController`
-* Built-in motions: `behind` / `drawer` / `scroll`; vertical axis supported
-* `FastSlidableGroup` keeps one open row per `groupTag`; `closeOnScroll` closes on list scroll
-* Works with vertical `FastRefresh` / `FastPagingList`: refresh drag or processing locks sliding
-* Added `FastRefresh.maybeOf` for optional ancestor lookup
+* Vertical `FastRefresh` locks reorder and `FastSlidable` while pulling or processing; the lock is read at drag start, so pointer-down does not rebuild every tile
+* Load-more stays smooth: `FastRefresh` no longer retargets the ballistic simulation once new items bring the list back in range; `FastAnimatedList` snaps tail inserts while Refresh is active or the list is still moving
+* Fixed handle reorder: the drag origin no longer follows the shift `Transform`, and the handle claims the gesture immediately so the parent `Scrollable` cannot steal a vertical drag
+* Added `FastSlidable`: swipe to reveal actions, full swipe, dismiss-to-delete, and programmatic `FastSlidableController`
+* Built-in motions: `behind` / `drawer` / `scroll`; horizontal and vertical axes
+* `FastSlidableGroup` keeps one open row per `groupTag`; `closeOnScroll` closes the open row when the list scrolls
+* Dismiss and dismissing full swipe require a `key` on `FastSlidable`; releasing past `FastSlidableFullSwipe.threshold` now schedules a frame, so the row dismisses without waiting for a later tap
 * Added `FastSlidableTheme` (`ThemeExtension`)
+* Added `FastRefresh.maybeOf` for optional ancestor lookup
+* `FastPagingState.replaceData` replaces loaded data and rebuilds after a local edit such as swipe-delete
+* `FastRefresh` indicator listeners are deferred out of layout, so a header or footer `setState` during layout no longer hits "Build scheduled during frame"
+* `FastShimmerScope` holds the gradient through `pauseDuration` without a `ShaderMask` saveLayer on every paused frame, and keeps the skeleton behind a `RepaintBoundary`
+* `FastShimmerSlideUnlock` moves the thumb with a transform and pauses the beam while dragging, so drag frames do not rebuild the `ShaderMask`
+* Loading overlay blocks route pop on the declared SDK range (Flutter 3.19+)
+* Docs (Chinese and English) cover Animated List and Slidable; the docs site embeds the live Flutter web demo
+* Example: Animated List scenes cover insert/remove (including batch), drag, both, Refresh, Slidable, and Refresh+Slidable, each with List / Sliver / Column × list / grid; Slidable scenes cover basic, dismiss, programmatic, vertical, and Refresh
+* Tests cover list diff / stagger / reorder, slidable (including full-swipe dismiss), refresh layout notify, and slide-unlock drag
 
 # 0.0.1
 

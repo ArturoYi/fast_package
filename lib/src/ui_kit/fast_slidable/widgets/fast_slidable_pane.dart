@@ -245,11 +245,18 @@ class _FastSlidablePaneState extends State<FastSlidablePane>
     final FastSlidableDismiss? dismiss = widget.dismiss;
 
     if (fullSwipe != null && position >= fullSwipe.threshold) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _triggerFullSwipe();
-        }
-      });
+      // addPostFrameCallback does not schedule a frame. Releasing after the
+      // last drag frame has already painted leaves the callback queued until
+      // some later interaction (a tap) finally draws a frame.
+      // addPostFrameCallback 不会自己排帧。最后一帧拖动已经画完再松手时，
+      // 回调会一直挂着，直到之后的点击才画出新帧、删除才发生。
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) {
+          if (mounted) {
+            _triggerFullSwipe();
+          }
+        })
+        ..scheduleFrame();
       return;
     }
 
@@ -399,14 +406,14 @@ class _FastSlidableDismissBinder extends StatefulWidget {
       _FastSlidableDismissBinderState();
 }
 
-class _FastSlidableDismissBinderState extends State<_FastSlidableDismissBinder> {
+class _FastSlidableDismissBinderState
+    extends State<_FastSlidableDismissBinder> {
   FastSlidableController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        FastSlidableScope.maybeOf(context, listen: false)?.controller;
+    _controller = FastSlidableScope.maybeOf(context, listen: false)?.controller;
     _controller?.dismissIntent.addListener(_handleDismissIntent);
   }
 

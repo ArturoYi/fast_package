@@ -739,6 +739,7 @@ Widget demoSlidable({
     endPane: FastSlidablePane(
       motion: FastSlidableMotion.scroll,
       dismiss: FastSlidableDismiss(onDismissed: onDelete),
+      fullSwipe: const FastSlidableFullSwipe(threshold: 0.5),
       children: <Widget>[
         FastSlidableAction(
           onPressed: (_) => onDelete(),
