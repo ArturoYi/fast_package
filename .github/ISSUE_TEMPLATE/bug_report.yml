@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        先搜一下 [已有 Issue](https://github.com/ArturoYi/fast_package/issues)。贡献说明见 [贡献](https://arturoyi.github.io/fast_package/community/contributing.html)。
-        新功能用「功能」模板。别贴密钥、证书或业务数据。
+        先搜一下 [已有 Issue](https://github.com/ArturoYi/fast_package/issues)。字段说明见 [贡献](https://arturoyi.github.io/fast_package/community/contributing.html)。
+        新功能用「功能」模板，错字、缺示例用「文档」模板。别贴密钥、证书或业务数据。
   - type: textarea
     id: summary
     attributes:

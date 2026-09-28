@@ -8,6 +8,7 @@ body:
       value: |
         说清楚要解决什么，以及期望的 API 或交互长什么样。
         优先稳住现有能力，再考虑扩展；尽量不引入第三方依赖。
+        只改文档时用「文档」模板。字段说明见 [贡献](https://arturoyi.github.io/fast_package/community/contributing.html)。
   - type: textarea
     id: problem
     attributes:
